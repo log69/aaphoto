@@ -1,0 +1,57 @@
+The software needs the following components to be installed on the system
+before compilation:
+
+GCC - Gnu Compiler Collection, http://gcc.gnu.org/
+libgomp - OpenMP for parallel programming, http://gcc.gnu.org/onlinedocs/libgomp/
+libjasper - JasPer software, http://www.ece.uvic.ca/~mdadams/jasper/
+libjpeg - IJG Jpeg software, http://www.ijg.org/
+libpng - PNG software, http://www.libpng.org/
+libz - Compression library, http://www.zlib.net/
+
+Remark: GCC 4.2 and above should come with libgomp
+
+
+********************************************************************************
+Installing development files for Debian GNU/Linux:
+-----------------------------------------------------
+su -c "apt-get install build-essential libjpeg-dev libjasper-dev libz-dev
+libpng-dev"
+
+Compiling and installing aaphoto:
+----------------------------------------
+wget log69.com/downloads/aaphoto_sources.tar.gz
+tar xf aaphoto_sources.tar.gz
+cd aaphoto-*
+
+./configure && make && su -c "make install"
+
+
+********************************************************************************
+Compiling from whole source code (only gcc is needed):
+----------------------------------------------------------
+wget http://log69.com/downloads/aaphoto_sources_all.tar.gz
+
+gunzip aaphoto_sources_all.tar.gz
+tar xf aaphoto_sources_all.tar
+cd aaphoto/scripts
+./cc_all_unix.sh
+
+../bin/aaphoto
+
+
+********************************************************************************
+To compile the software manually, you should run this from a console:
+-------------------------------------------------------------------------
+
+gcc aaphoto.c -o aaphoto -O2 -ljasper -ljpeg -lpng -lz -lm -D__OPENMP__ -fopenmp
+-lgomp
+********************************************************************************
+
+
+********************************************************************************
+To compile the software manually with only BMP support without any extra libs
+(only math library is needed):
+--------------------------------------------------------------------------------
+
+gcc aaphoto.c -o aaphoto -O2 -lm -D __BMP_ONLY__
+********************************************************************************

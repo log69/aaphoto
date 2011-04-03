@@ -1,0 +1,169 @@
+aaphoto Changelog:
+--------------------
+2011/01/26 - aaphoto v0.41 - new aaRGB v0.64 version update (see aaRGB changelog)
+                           - add -- switch to mark the end of option list for posix compatibility
+                           - fix some warnings given by -Wextra compile option
+2010/12/18 - aaphoto v0.40 - new aaRGB v0.63 version update
+                           - fix some warning messages during build
+                           - some changes in documentation
+                           - error message when --verbose switch is used with no other ones to avoid misunderstanding
+                             that other switches are still needed (aaphoto -V file)
+2010/09/14 - aaphoto v0.39 - new aaRGB v0.62 version update
+                           - bugfix: an ugly misconception in my paralleled code caused weird behavior when using more threads
+                           - bugfix: BMP image writer function didn't zero out the BMP align bytes in file buffer
+                             therefore the same output differed in some cases
+                           - bugfix: PNG image reader function stored the unreliable values of pixel resolution
+                             when the type was unknown
+                           - rewrite the code to suffice the ISO C90 ANSI standard C form (GCC -pedantic option)
+                           - new windows platform patch of libjasper for static build to replace mkstemp() function call
+                             because it is not yet supported under MinGW
+                           - some changes in documentation
+                           - new default LDFLAG -lgomp for OpenMP
+                           - update all build scripts for Debian 6 platform
+2010/07/18 - aaphoto v0.38 - add verbose message showing presence of alpha channel in PNG images
+                           - bugfix: fix compile with only BMP support
+                           - fix some warning messages during build
+                           - remove unnecessary __WIN32__ macro
+2010/05/10 - aaphoto v0.37 - add OpenMP support for multi processing, all possible time intensive codes paralleled
+                             __OPENMP__ directive and -fopenmp option are needed at compile time (supported since GCC v4.2)
+                             (not available on windows platform yet)
+                           - new -t, --threads switch added to manually set the number of working threads
+                           - new aaRGB v0.61 version update
+                           - bugfix: exif info was left out after last version's change in JPEG handling
+                           - improve exif handling and verbose messages
+                           - refine additional verbose messages
+                           - remove pgx file type support because it is outdated
+                           - some changes in documentation
+                           - some minor code cleanup and bugfixes
+2010/03/16 - aaphoto v0.36 - bugfix: fix for tmpfile() patches of libjasper and libjpeg (windows platform only)
+                             when running more than one instances of aaphoto at a time
+                             they all used the same temporary files and therefore the images became corrupt
+                           - bugfix: it doesn't ask for administrative privileges anymore while running in an admin account
+                             under vista and windows 7 (windows platform only)
+                           - bugfix: the --rotate180 switch didn't turn the middle line in images with odd heights
+                           - rewrite JPEG format handling entirely to be able to handle extra parameters in this format
+                             separately, now libjpeg is used directly instead of libjasper for reading / writing JPEG images
+                             so libjpeg is a new dependency from now, formerly only libjasper was depended on it
+                           - restore original DPI values of images in BMP, JPEG and PNG formats during conversion
+                           - refine program messages
+                           - print the time elapsed in seconds since program start in verbose mode if not zero
+                           - print extra infos of bitmap dimension, resolution and color depth in verbose mode
+2010/02/25 - aaphoto v0.35 - bugfix: possible buffer overflows fixed
+2010/02/19 - aaphoto v0.34 - __UNIX__ macro removed from Makefile, not needed anymore
+                           - bugfix: static binary update with patches of libjasper and libjpeg
+                             1) sleep() function missing on mingw32 platform
+                             2) bad implementation of tmpfile() function on windows platform
+                                it tries to create temporary files in the root of current directory
+                                instead of the system temporary path so that causes failure for unprivileged users
+                                who don't have permissions to write there
+                           - update: changes in new version of libpng 1.4.0, aaio.c updated as necessary
+                                png_check_sig() function replaced with png_sig_cmp()
+                                setjmp(png_ptr->jmpbuf) has been deprecated, changed to setjmp(png_jmpbuf(png_ptr))
+                                see more at http://www.libpng.org/pub/png/src/libpng-1.2.x-to-1.4.x-summary.txt
+2010/01/10 - aaphoto v0.33 - some changes in documentation
+                           - bugfix: unfreed space caused memory leak
+                           - bugfix: uninitialized variable caused --resize to misbehave
+                           - fix: change of return values in procedures to reflect standard exit codes
+                             now it has a sense to run something like "aaphoto image.jpg && echo OK"
+                             formerly return codes meant opposite
+                           - fix a warning message during compile time, an include was missing
+                           - boundary check of fixed size arrays added for safety reasons
+                           - the --speed switch removed, it made the code less platform independent and was fussy anyway
+                           - error messages printed to stderr instead of stdout from now
+                           - more verbose error messages on failure of image load
+2009/10/18 - aaphoto v0.32 - new aaRGB v0.60 version update
+                           - new --noexif switch added to save new image without exif info
+                           - new --bmp switch added for BMP format output
+                           - new -o, --output switch added for alternate directory output
+2009/08/23 - aaphoto v0.31 - bugfix: __BMP_ONLY__ directive is fixed in source code
+                           - bugfix: writing of BMP images could result in corrupt BMP structure
+                           - code cleanup in BMP write function
+                           - parameters of switches also work with spaces between them
+                           - new aaRGB v0.59 version update
+2009/02/22 - aaphoto v0.30 - implement PNG format (RGB and Gray images read / write with alpha channel support)
+                           - bugfix: reading corrupt exif info in JPEG files could get into an infinite loop
+                           - bugfix: length of exif info was determined wrongly
+                           - rework of the parameters and switches parsing part
+                           - lots of code cleanup
+                           - most of the comments in code translated to english
+                           - print messages get flushed out with fflush now during process
+                           - the --info switch removed
+                           - the -o switch removed for safety reasons, --overwrite still available
+                           - the -h switch added for unix compatibility
+                           - the -j1 and -j2 switch removed, --jpg and --jp2 still available
+                           - the --png switch is now new for PNG output
+                           - the -s switch changed from --speed to --silent for compatibility
+                           - the --mute switch changed to -s, --silent and --quiet for unix / posix compatibility
+                           - the -V, --verbose switch is now new for more detailed output during image process
+                           - the --test switch now turns the --autoadjust switch on by default
+			   - the -d, --description and -l, --license switches removed
+			   - thanks to Rezső Páder (rezso.net) for the suggestions for the option switches
+                           - new aaRGB v0.58 version update
+2008/02/02 - aaphoto v0.29 - bugfix: color space variable was not defined during the load of BMP format
+                           - bugfix: BMP format handling fixed for JPEG conversion
+                           - grayscale images can also be used as an input
+                           - increase file name buffer for processing files in folders
+                           - Exif meta data information is now restored during conversion in JPEG images
+2007/08/11 - aaphoto v0.28 - new aaRGB v0.57 version update
+                           - bugfix: remove extra slashes from the end of folders
+2007/07/04 - aaphoto v0.27 - new aaRGB v0.56 version update v0.56 with "Apply only on selection" function
+2007/05/26 - aaphoto v0.26 - bugfix: Win32 version crashed during JPEG-2000 conversion
+2007/05/19 - aaphoto v0.25 - expand functions: rotate 90, 180, 270, flip x, flip y
+2007/05/01 - aaphoto v0.24 - improve timing values
+                           - input parameter can be folders beside files too
+                           - bitmap info parameter now works with bmp too
+                           - simplify parameter input: no --autoadjust parameter needed from now, default is on
+2007/04/03 - aaphoto v0.23 - new aaRGB v0.55 version update
+2007/04/01 - aaphoto v0.22 - new aaRGB v0.54 version update
+2007/03/30 - aaphoto v0.21 - create bmp_only macro in source code for other platforms
+                           - bug fixes
+2007/03/29 - aaphoto v0.20 - new aaRGB v0.53 version update
+2007/02/25 - aaphoto v0.19 - extra information output within image for testing purposes
+2007/02/22 - aaphoto v0.18 - custom code for BMP input/output
+2007/01/24 - aaphoto v0.17 - implement JasPer encoder for further image formats
+2007/01/04 - aaphoto v0.16 - stable working command-line version for linux environment with BMP format support
+
+
+aaRGB Changelog:
+------------------
+2011/01/26 - aaRGB v0.64 - the contrast seemed strong with the default initial value of the former algorithm,
+                           so now constant optimized to the new contrast algorithm introduced in 0.63
+                         - add more detailed explanations to the contrast algorithm (in hungarian)
+2010/12/18 - aaRGB v0.63 - include OpenMP defs in aargb.c too for standalone usage
+                         - fix some warning messages during build
+                         - make embedded test info image look more readable by changing the colors (--test switch)
+                         - change saturation algorithm from linear to exponential
+                         - improve contrast algorithm to include a self balance mechanism to avoid overexposure
+                           on images with large blank areas that have relatively small details
+                         - improve color balance algorithm to make it a bit more aggressive by raising the value
+                           of the color difference factor of the white and black point to the 3rd power
+                         - speed up process by skipping saturation part if no change is needed
+                         - some memory allocation check
+                         - some changes in documentation
+2010/09/14 - aaRGB v0.62 - bugfix: an ugly misconception in my paralleled code caused weird behavior
+                           when using more threads
+                         - rewrite the code to suffice the ISO C90 ANSI standard C form (GCC -pedantic option)
+2010/05/02 - aaRGB v0.61 - add OpenMP support for multi processing, all computing cycles paralleled
+                         - solve warning issues with some uninitialized variables
+                         - some code cleanup
+2009/10/18 - aaRGB v0.60 - remove gamma handling of the lighter colors from the two-pole gamma computing
+                           by setting the gamma_interval_high from 0.9 to 1, it proved to be inefficient
+2009/04/05 - aaRGB v0.59 - some more code cleanup
+2009/02/22 - aaRGB v0.58 - code cleanup
+2007/08/11 - aaRGB v0.57 - improve black and white point analyzing
+                           from now they are not scaled to perfect black and white, but to their darkest
+                           and brightest color that have maximum saturation to fix overexposure problem
+                         - improve saturation algorithm with full floating point computing and HSL conversion
+                           to fix over saturated colors
+                         - expand image information display with color balance circle for testing (--test switch)
+                         - remove text information from test display (--test switch)
+2007/06/21 - aaRGB v0.56 - expand functionality with "apply only on selection" to process only the selected area
+2007/04/03 - aaRGB v0.55 - maximize saturation limit with a predefined constant to avoid overexposure in saturation
+                           when reconverting the same image
+2007/04/01 - aaRGB v0.54 - new two-pole gamma computing
+                         - new saturation compensation
+2007/03/29 - aaRGB v0.53 - improve contrast computing to avoid underexposure
+2007/02/25 - aaRGB v0.52 - improve image information display for testing (--test switch)
+2007/02/16 - aaRGB v0.51 - improve average RGB color computing for more accurate color balance calibration
+2007/01/04 - aaRGB v0.49 - stable working version with gamma handling and more clever image analyzing
+2006/08/29 - aaRGB project begun...

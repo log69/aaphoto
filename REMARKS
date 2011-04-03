@@ -1,0 +1,43 @@
+Auto Adjust Photo - other remarks
+-----------------------------------------------------------------------------------------
+
+Remember:
+-----------
+- mark changes in aaphoto.c and aargb.c (changelog in the begining)
+- check if readme texts are within 80 characters width
+- check source codes for security errors: cd sources ; rats *.c | grep -i high
+- check source codes for memory leaks: valgrind aaphoto image.jpg
+- after installation of innosetup in wine: ln -s ~/development/aaphoto ~/.wine/dosdevices/z:
+- run copy script for new release
+
+
+Places to change version number:
+---------------------------------
+- aaphoto.c: beginning of source code at the changelog
+- aaphoto.c: beginning of source code where the --version switch info is
+- aargb.c: beginning of source code at the changelog
+- inno setup source code
+- scripts/copy_all_to_downloads.sh
+- debian_package/debian/DEBIAN/control file
+- manual file (date and versions too)
+- generate README file
+- generate sources/ChangeLog
+- create a compressed backup from current version in ./backup folder with version number
+- aaphoto.html: at the downloads (date, version, file size, link to another release version)
+- index.html: at blog part (only place to change manually)
+
+-----------------------------------------------------------------------------------------
+
+Compiling:
+-----------
+- for compiling 32 bit binary on 64 bit system: "./cc_all_unix.sh -m32"
+- m32 option might need this on debian: apt-get install libc6-dev-i386
+- at compile the included libs should have the order where the first ones depend the latter ones
+- __OPENMP__ directive and -fopenmp -lgomp option needed at compile time for OpenMP support
+- innosetup should be installed into wine
+
+-----------------------------------------------------------------------------------------
+
+AUTOMAKE:
+-----------
+autoscan && mv configure.scan configure.in && autoconf && automake

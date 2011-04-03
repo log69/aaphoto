@@ -1,0 +1,86 @@
+Auto Adjust Photo
+Copyright (C) 2006-2011 Andras Horvath
+E-mail: mail@log69.com - suggestions & feedbacks are welcome
+URL: http://log69.com - the official site
+aaphoto (command-line) version - v0.41
+aaRGB (color-correction engine) version - v0.64
+last update = 20/03/2011
+
+The following libraries are used by this program:
+libgomp - OpenMP for parallel programming, 
+http://gcc.gnu.org/onlinedocs/libgomp/
+libjasper - JasPer software, http://www.ece.uvic.ca/~mdadams/jasper/
+libjpeg - IJG JPEG software, http://www.ijg.org/
+libpng - PNG software, http://www.libpng.org/
+libz - Compression library, http://www.zlib.net/
+
+[LICENSE]
+This program is free software; you can redistribute it and/or modify it under 
+the terms of the GNU General Public License as published by the Free Software 
+Foundation; either version 3 of the License, or (at your option) any later 
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY 
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with 
+this program.  If not, see <http://www.gnu.org/licenses/>.
+
+[DESCRIPTION]
+Auto Adjust Photo is a tiny command-line image manipulation tool for automatic 
+color correction of photos. It tries to make the picture look better. The 
+program does this by analyzing the input image and then sets the most optimal 
+contrast, gamma, color balance and saturation for it.
+
+[HELP]
+USAGE: aaphoto [options] [source files]
+
+The following image types are supported (thanks to JasPer, JPEG and PNG):
+mif, pnm / pgm / ppm, bmp, ras, jp2, jpc, jpg, png
+
+Quality settings can be applied only to jp2, jpc, jpg formats
+
+The following options are supported:
+    -h   --help          Print this help
+    -v   --version       Print version information
+    -a   --autoadjust    Auto adjust the colors of the image
+    -o   --output        Set output directory
+         --overwrite     Overwrite mode, the original source file is replaced
+         --jpg           JPEG image output
+         --jp2           JPEG 2000 image output
+         --png           PNG image output with alpha channel support
+         --bmp           BMP image output
+    -r   --resize        Resize image taking the longer side in % or pixels
+         --rotate90      Rotate image with 90 degrees clockwise
+         --rotate180     Rotate image with 180 degrees
+         --rotate270     Rotate image with 90 degrees counter-clockwise
+         --flipx         Mirror image horizontally
+         --flipy         Mirror image vertically
+         --noexif        Save image without EXIF info
+    -q   --quality       Set image quality from 1 to 100
+    -t   --threads       Set number of working threads (default: autodetect)
+    -s   --silent        Silent mode, no information printed during operation
+         --quiet         ...same as above
+    -V   --verbose       Print verbose information about processing
+         --test          Print detailed test information into image
+
+EXAMPLES:
+     aaphoto image.jpg
+     aaphoto -a -r600 -q85 *.jpg
+     aaphoto mydir
+     aaphoto -V --resize70% image.png
+     aaphoto --quality60 image.jp2
+
+REMARKS:
+- auto adjust parameter is set by default without any other parameters
+- _new file name will be generated without --overwrite parameter
+- every file is processed on directory input but not recursively
+- order of parameters does not matter
+- resize value can be set in percentage too
+- resize parameter should be less or equal than original
+- resize uses the best (and slowest) resampling method
+- default jpeg compression quality is 95%
+- EXIF information is restored in jpeg images by default
+- number of threads is set to the number of online processors by default
+

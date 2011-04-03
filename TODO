@@ -1,0 +1,21 @@
+Auto Adjust Photo - TODO LIST
+-------------------------------
+
+- run color adjustment only on maximum 1 mpixel size of the image to speed up process
+- check sorces with splint
+- translate all comments to english in aargb.c too
+- include manual file with sources
+- give more verbose error messages on faliure of image load
+- recursive directory read with -R and --recursive switches
+- ability to pipe through image data
+- check EXIF handling in libjpeg if it can restore data on its own
+- at jpeg images, try to set back the original compression quality
+
+- autorotate function according to exif info (not default)
+- automatically ignore the frame part of the picture in computing
+- add --nodate option for leaving out dates stamped on pictures
+
+- automatic red eye removal (print message if there was any)
+- automatic noise reduction
+- automatic selective gaussian blur
+- automatic sharpening

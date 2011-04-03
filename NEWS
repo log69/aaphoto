@@ -1,0 +1,3 @@
+2011/01/26 - aaphoto v0.41 - new aaRGB v0.64 version update (see aaRGB changelog)
+                           - add -- switch to mark the end of option list for posix compatibility
+                           - fix some warnings given by -Wextra compile option
