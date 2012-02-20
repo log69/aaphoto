@@ -1839,7 +1839,9 @@ int BITMAP_WRITE_PNG(char *file_name)
         if (fhandle == 0) return 1;
 
 	png_init_io(png_ptr, fhandle);
-	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
+/*	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);*/
+/*	set the compression level manually */
+	png_set_compression_level(png_ptr, 5);
 
 	/* set image header */
 	png_set_IHDR(png_ptr, info_ptr, bitmap_width, bitmap_height,
