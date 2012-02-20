@@ -23,13 +23,14 @@
 
 /* --------------------------------------------------- */
 /* ----------- Auto Adjust Photo --------------------- */
-/* ----------- András Horváth (C) 2006-2011 ---------- */
+/* ----------- András Horváth (C) 2006-2012 ---------- */
 /* ----------- Hungary, http://log69.com ------------- */
 /* --------------------------------------------------- */
 
 /*
 aaphoto Changelog:
 --------------------
+2012/02/20 - aaphoto v0.42 - tiny fix to set PNG compression manually and make it compatible with new version of libpng
 2011/01/26 - aaphoto v0.41 - new aaRGB v0.64 version update (see aaRGB changelog)
                            - add -- switch to mark the end of option list for posix compatibility
                            - fix some warnings given by -Wextra compile option
@@ -262,12 +263,12 @@ char slsh='/';
 
 void PRINT_VERSION(void){
 STRING_PRINT("Auto Adjust Photo\n");
-STRING_PRINT("Copyright (C) 2006-2011 Andras Horvath\n");
+STRING_PRINT("Copyright (C) 2006-2012 Andras Horvath\n");
 STRING_PRINT("E-mail: mail@log69.com - suggestions & feedbacks are welcome\n");
 STRING_PRINT("URL: http://log69.com - the official site\n");
 STRING_PRINT("aaphoto (command-line) version - v0.41\n");
 STRING_PRINT("aaRGB (color-correction engine) version - v0.64\n");
-STRING_PRINT("last update = 20/03/2011\n");
+STRING_PRINT("last update = 20/02/2012\n");
 STRING_PRINT("\n");
 #ifndef __BMP_ONLY__
 STRING_PRINT("The following libraries are used by this program:\n");
