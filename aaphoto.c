@@ -23,7 +23,7 @@
 
 /* --------------------------------------------------- */
 /* ----------- Auto Adjust Photo --------------------- */
-/* ----------- András Horváth (C) 2006-2012 ---------- */
+/* ----------- András Horváth (C) 2006-2013 ---------- */
 /* ----------- Hungary, http://log69.com ------------- */
 /* --------------------------------------------------- */
 
@@ -263,12 +263,12 @@ char slsh='/';
 
 void PRINT_VERSION(void){
 STRING_PRINT("Auto Adjust Photo\n");
-STRING_PRINT("Copyright (C) 2006-2012 Andras Horvath\n");
+STRING_PRINT("Copyright (C) 2006-2013 Andras Horvath\n");
 STRING_PRINT("E-mail: mail@log69.com - suggestions & feedbacks are welcome\n");
 STRING_PRINT("URL: http://log69.com - the official site\n");
 STRING_PRINT("aaphoto (command-line) version - v0.42\n");
 STRING_PRINT("aaRGB (color-correction engine) version - v0.64\n");
-STRING_PRINT("last update = 20/02/2012\n");
+STRING_PRINT("last update = 26/09/2013\n");
 STRING_PRINT("\n");
 #ifndef __BMP_ONLY__
 STRING_PRINT("The following libraries are used by this program:\n");
