@@ -1,5 +1,5 @@
-AC_INIT([aaphoto], [0.41], [mail@log69.com])
-AM_INIT_AUTOMAKE([aaphoto], [0.41])
+AC_INIT([aaphoto], [0.42], [mail@log69.com])
+AM_INIT_AUTOMAKE([aaphoto], [0.42])
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
