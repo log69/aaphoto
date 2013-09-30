@@ -29,6 +29,7 @@
 
 aaRGB Changelog:
 ------------------
+2013/09/30 - aaRGB v0.65 - fix some compile time warnings and uninitalized variables
 2011/01/26 - aaRGB v0.64 - the contrast seemed strong with the default initial value of the former algorithm,
                            so now constant optimized to the new contrast algorithm introduced in 0.63
                          - add more detailed explanations to the contrast algorithm (in hungarian)
@@ -300,14 +301,17 @@ void AARGB_MAIN(
       long *hist3n;
       long hist_min;
       long hist_max;
-      long hist_sum;
       long hist_cut_columns;
       long hist_cut_weight;
       double hist_cut_limit;
       double hist_avg;
+
+/*
+      long hist_sum;
       long hist_min_test;
       long hist_max_test;
       double hist_avg_test;
+*/
 
       long hist_satur[256];
       long  *hist_saturn;
@@ -336,8 +340,8 @@ void AARGB_MAIN(
       double wp_end, bp_end;
       double wp_r, wp_g, wp_b;
       double bp_r, bp_g, bp_b;
-      double wp_r_end, wp_g_end, wp_b_end;
-      double bp_r_end, bp_g_end, bp_b_end;
+      double wp_r_end = 0, wp_g_end = 0, wp_b_end = 0;
+      double bp_r_end = 0, bp_g_end = 0, bp_b_end = 0;
 
       long cc;
       long addr, addr2;
@@ -581,14 +585,18 @@ void AARGB_MAIN(
         if (hist_max < (long)temp1){ hist_max = (long)temp1; }
         hist_avg = hist_avg + temp1;
     }
-    /* histogram zeljes összege */
-    hist_sum = hist_avg;
+    /* histogram teljes összege */
+/*    hist_sum = hist_avg; */
+
     /* histogram matematikai átlag értéke */
     hist_avg = hist_avg / 256;
 
+/*
     hist_min_test = hist_min;
     hist_max_test = hist_max;
     hist_avg_test = hist_avg;
+*/
+
     /* ez lesz itt a limit */
     temp1 = hist_avg * cont_max;
     hist_cut_limit = temp1;
