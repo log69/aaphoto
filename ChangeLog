@@ -1,5 +1,6 @@
 aaphoto Changelog:
 --------------------
+2013/09/30 - aaphoto v0.43 - new aaRGB v0.65 version update (see aaRGB changelog)
 2012/02/20 - aaphoto v0.42 - tiny fix to set PNG compression manually and make it compatible with new version of libpng
 2011/01/26 - aaphoto v0.41 - new aaRGB v0.64 version update (see aaRGB changelog)
                            - add -- switch to mark the end of option list for posix compatibility
