@@ -128,6 +128,7 @@ aaphoto Changelog:
 
 aaRGB Changelog:
 ------------------
+2013/09/30 - aaRGB v0.65 - fix some compile time warnings and uninitalized variables
 2011/01/26 - aaRGB v0.64 - the contrast seemed strong with the default initial value of the former algorithm,
                            so now constant optimized to the new contrast algorithm introduced in 0.63
                          - add more detailed explanations to the contrast algorithm (in hungarian)
