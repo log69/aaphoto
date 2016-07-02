@@ -1,15 +1,14 @@
 Auto Adjust Photo
-Copyright (C) 2006-2013 Andras Horvath
+Copyright (C) 2006-2016 Andras Horvath
 E-mail: mail@log69.com - suggestions & feedbacks are welcome
-URL: http://log69.com - the official site
-aaphoto (command-line) version - v0.42
+URL: http://log69.com/aaphoto_en.html - the official site
+aaphoto (command-line) version - v0.44
 aaRGB (color-correction engine) version - v0.64
-last update = 26/09/2013
+last update = 02/07/2016
 
 The following libraries are used by this program:
 libgomp - OpenMP for parallel programming, 
 http://gcc.gnu.org/onlinedocs/libgomp/
-libjasper - JasPer software, http://www.ece.uvic.ca/~mdadams/jasper/
 libjpeg - IJG JPEG software, http://www.ijg.org/
 libpng - PNG software, http://www.libpng.org/
 libz - Compression library, http://www.zlib.net/
@@ -36,10 +35,10 @@ contrast, gamma, color balance and saturation for it.
 [HELP]
 USAGE: aaphoto [options] [source files]
 
-The following image types are supported (thanks to JasPer, JPEG and PNG):
-mif, pnm / pgm / ppm, bmp, ras, jp2, jpc, jpg, png
+The following image types are supported (thanks to JPEG and PNG):
+bmp, jpg, png
 
-Quality settings can be applied only to jp2, jpc, jpg formats
+Quality settings can be applied only to jpg format
 
 The following options are supported:
     -h   --help          Print this help
@@ -48,7 +47,6 @@ The following options are supported:
     -o   --output        Set output directory
          --overwrite     Overwrite mode, the original source file is replaced
          --jpg           JPEG image output
-         --jp2           JPEG 2000 image output
          --png           PNG image output with alpha channel support
          --bmp           BMP image output
     -r   --resize        Resize image taking the longer side in % or pixels
@@ -70,7 +68,7 @@ EXAMPLES:
      aaphoto -a -r600 -q85 *.jpg
      aaphoto mydir
      aaphoto -V --resize70% image.png
-     aaphoto --quality60 image.jp2
+     aaphoto --quality60 image.jpg
 
 REMARKS:
 - auto adjust parameter is set by default without any other parameters

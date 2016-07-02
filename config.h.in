@@ -6,9 +6,6 @@
 /* Define to 1 if you have the `gomp' library (-lgomp). */
 #undef HAVE_LIBGOMP
 
-/* Define to 1 if you have the `jasper' library (-ljasper). */
-#undef HAVE_LIBJASPER
-
 /* Define to 1 if you have the `jpeg' library (-ljpeg). */
 #undef HAVE_LIBJPEG
 

@@ -1,5 +1,5 @@
-AC_INIT([aaphoto], [0.42], [mail@log69.com])
-AM_INIT_AUTOMAKE([aaphoto], [0.42])
+AC_INIT([aaphoto], [0.44], [mail@log69.com])
+AM_INIT_AUTOMAKE([aaphoto], [0.44])
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
@@ -13,8 +13,6 @@ AC_PROG_CC
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lgomp':
 AC_CHECK_LIB([gomp], [main])
-# FIXME: Replace `main' with a function in `-ljasper':
-AC_CHECK_LIB([jasper], [main])
 # FIXME: Replace `main' with a function in `-ljpeg':
 AC_CHECK_LIB([jpeg], [main])
 # FIXME: Replace `main' with a function in `-lm':
