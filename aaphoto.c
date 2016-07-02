@@ -23,13 +23,15 @@
 
 /* --------------------------------------------------- */
 /* ----------- Auto Adjust Photo --------------------- */
-/* ----------- András Horváth (C) 2006-2013 ---------- */
+/* ----------- András Horváth (C) 2006-2016 ---------- */
 /* ----------- Hungary, http://log69.com ------------- */
 /* --------------------------------------------------- */
 
 /*
 aaphoto Changelog:
 --------------------
+2016/07/02 - aaphoto v0.44 - remove libjasper dependency because it gets removed from Debian 9
+                             and anyway it supported file formats that nobody used
 2013/09/30 - aaphoto v0.43 - new aaRGB v0.65 version update (see aaRGB changelog)
 2012/02/20 - aaphoto v0.42 - tiny fix to set PNG compression manually and make it compatible with new version of libpng
 2011/01/26 - aaphoto v0.41 - new aaRGB v0.64 version update (see aaRGB changelog)
@@ -201,7 +203,6 @@ int opt_version;
 int opt_autoadjust;
 int opt_overwrite;
 int opt_jpg;
-int opt_jp2;
 int opt_png;
 int opt_bmp;
 int opt_resize;
@@ -243,7 +244,6 @@ char slsh='/';
 
 
 #ifndef __BMP_ONLY__
-#include <jasper/jasper.h>
 #include <png.h>
 #include <jpeglib.h>
 #endif
@@ -264,19 +264,18 @@ char slsh='/';
 
 void PRINT_VERSION(void){
 STRING_PRINT("Auto Adjust Photo\n");
-STRING_PRINT("Copyright (C) 2006-2013 Andras Horvath\n");
+STRING_PRINT("Copyright (C) 2006-2016 Andras Horvath\n");
 STRING_PRINT("E-mail: mail@log69.com - suggestions & feedbacks are welcome\n");
-STRING_PRINT("URL: http://log69.com - the official site\n");
-STRING_PRINT("aaphoto (command-line) version - v0.43\n");
+STRING_PRINT("URL: http://log69.com/aaphoto_en.html - the official site\n");
+STRING_PRINT("aaphoto (command-line) version - v0.44\n");
 STRING_PRINT("aaRGB (color-correction engine) version - v0.65\n");
-STRING_PRINT("last update = 26/09/2013\n");
+STRING_PRINT("last update = 02/07/2016\n");
 STRING_PRINT("\n");
 #ifndef __BMP_ONLY__
 STRING_PRINT("The following libraries are used by this program:\n");
 #ifdef __OPENMP__
 STRING_PRINT("libgomp - OpenMP for parallel programming, http://gcc.gnu.org/onlinedocs/libgomp/\n");
 #endif
-STRING_PRINT("libjasper - JasPer software, http://www.ece.uvic.ca/~mdadams/jasper/\n");
 STRING_PRINT("libjpeg - IJG JPEG software, http://www.ijg.org/\n");
 STRING_PRINT("libpng - PNG software, http://www.libpng.org/\n");
 STRING_PRINT("libz - Compression library, http://www.zlib.net/\n");
@@ -329,10 +328,10 @@ void PRINT_HELP(void){
 STRING_PRINT("[HELP]\n");
 STRING_PRINT("USAGE: aaphoto [options] [source files]\n");
 STRING_PRINT("\n");
-STRING_PRINT("The following image types are supported (thanks to JasPer, JPEG and PNG):\n");
-STRING_PRINT("mif, pnm / pgm / ppm, bmp, ras, jp2, jpc, jpg, png\n");
+STRING_PRINT("The following image types are supported (thanks to JPEG and PNG):\n");
+STRING_PRINT("bmp, jpg, png\n");
 STRING_PRINT("\n");
-STRING_PRINT("Quality settings can be applied only to jp2, jpc, jpg formats\n");
+STRING_PRINT("Quality settings can be applied only to jpg format\n");
 STRING_PRINT("\n");
 STRING_PRINT("The following options are supported:\n");
 STRING_PRINT("    -h   --help          Print this help\n");
@@ -341,7 +340,6 @@ STRING_PRINT("    -a   --autoadjust    Auto adjust the colors of the image\n");
 STRING_PRINT("    -o   --output        Set output directory\n");
 STRING_PRINT("         --overwrite     Overwrite mode, the original source file is replaced\n");
 STRING_PRINT("         --jpg           JPEG image output\n");
-STRING_PRINT("         --jp2           JPEG 2000 image output\n");
 STRING_PRINT("         --png           PNG image output with alpha channel support\n");
 STRING_PRINT("         --bmp           BMP image output\n");
 STRING_PRINT("    -r   --resize        Resize image taking the longer side in % or pixels\n");
@@ -364,7 +362,7 @@ STRING_PRINT("     aaphoto image.jpg\n");
 STRING_PRINT("     aaphoto -a -r600 -q85 *.jpg\n");
 STRING_PRINT("     aaphoto mydir\n");
 STRING_PRINT("     aaphoto -V --resize70% image.png\n");
-STRING_PRINT("     aaphoto --quality60 image.jp2\n");
+STRING_PRINT("     aaphoto --quality60 image.jpg\n");
 STRING_PRINT("\n");
 STRING_PRINT("REMARKS:\n");
 STRING_PRINT("- auto adjust parameter is set by default without any other parameters\n");
@@ -558,7 +556,6 @@ int MAIN_ARGUMENTS_READ(int argc, char **argv)
 	opt_overwrite = 0;
 	opt_noexif = 0;
 	opt_jpg = 0;
-	opt_jp2 = 0;
 	opt_png = 0;
 	opt_bmp = 0;
 	opt_resize = 0;
@@ -617,8 +614,6 @@ int MAIN_ARGUMENTS_READ(int argc, char **argv)
 					opt_wrong = 0; opt_noexif = 1; }
 				if (!STRING_COMPARE(myarg, "--jpg\0")){
 					opt_wrong = 0; opt_jpg = 1; }
-				if (!STRING_COMPARE(myarg, "--jp2\0")){
-					opt_wrong = 0; opt_jp2 = 1; }
 				if (!STRING_COMPARE(myarg, "--png\0")){
 					opt_wrong = 0; opt_png = 1; }
 				if (!STRING_COMPARE(myarg, "--bmp\0")){
@@ -951,7 +946,6 @@ int MAIN_ARGUMENTS_READ(int argc, char **argv)
 			/* check if only 1 type of output format is specified on input */
 			int cnt = 0;
 			if (opt_jpg) cnt++;
-			if (opt_jp2) cnt++;
 			if (opt_png) cnt++;
 			if (opt_bmp) cnt++;
 			if (cnt > 1){
@@ -970,7 +964,6 @@ int MAIN_ARGUMENTS_READ(int argc, char **argv)
 			cnt += opt_output;
 			cnt += opt_overwrite;
 			cnt += opt_jpg;
-			cnt += opt_jp2;
 			cnt += opt_png;
 			cnt += opt_bmp;
 			cnt += opt_resize;
@@ -1001,7 +994,6 @@ int MAIN_ARGUMENTS_READ(int argc, char **argv)
 			    (opt_overwrite ) ||
 			    (opt_noexif    ) ||
 			    (opt_jpg       ) ||
-			    (opt_jp2       ) ||
 			    (opt_png       ) ||
 			    (opt_bmp       ) ||
 			    (opt_resize    ) ||

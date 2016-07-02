@@ -370,7 +370,6 @@ int GET_FILE_NAME_NEW(char *strin, char *strout)
 	char fname [max_char];
 	char fext  [max_char];
 	char fextj1 [] = ".jpg\0";
-	char fextj2 [] = ".jp2\0";
 	char fextj3 [] = ".png\0";
 	char fextj4 [] = ".bmp\0";
 	char fnew   [] = "_new";
@@ -426,9 +425,8 @@ int GET_FILE_NAME_NEW(char *strin, char *strout)
 	while (fext[i] != '\0')
 	{
 		if (c >= max_char) return 255;
-		if ((!opt_jpg) && (!opt_jp2) && (!opt_png) && (!opt_bmp)) strout[c] = fext[i];
+		if ((!opt_jpg) && (!opt_png) && (!opt_bmp)) strout[c] = fext[i];
 		if (opt_jpg) strout[c] = fextj1[i];
-		if (opt_jp2) strout[c] = fextj2[i];
 		if (opt_png) strout[c] = fextj3[i];
 		if (opt_bmp) strout[c] = fextj4[i];
 		i++; c++;
@@ -436,8 +434,7 @@ int GET_FILE_NAME_NEW(char *strin, char *strout)
 	if (c >= max_char) return 255;
 	strout[c] = fext[i];
 
-	if (opt_jpg) bitmap_format_jpg_file_type = 6;
-	if (opt_jp2) bitmap_format_jpg_file_type = 4;
+	if (opt_jpg) bitmap_format_jpg_file_type = 1;
 
 	if (!(opt_overwrite) && (FILE_EXIST(strout))) return 1;
 
@@ -457,17 +454,11 @@ int GET_FILE_FORMAT(char *file_name)
 	char fext[max_char];
 	char fextl[max_char];
 
-	/* JasPer format codes (0-7) */
+	/* format codes */
 	/* --------------------------- */
-	/* 0 - mif */
-	/* 1 - pnm / pgm / ppm */
-	/* 2 - bmp */
-	/* 3 - ras */
-	/* 4 - jp2 */
-	/* 5 - jpc */
-	/* 6 - jpg */
-	/* 7 - pgx */
-	/* 8 - png */
+	/* 0 - bmp */
+	/* 1 - jpg */
+	/* 2 - png */
 
 	GET_FILE_EXTENSION(file_name, fext);
 
@@ -475,19 +466,11 @@ int GET_FILE_FORMAT(char *file_name)
 
 	res = -1;
 
-	if (!STRING_COMPARE(fextl, ".mif"))  res = 0;
-	if (!STRING_COMPARE(fextl, ".pnm"))  res = 1;
-	if (!STRING_COMPARE(fextl, ".pgm"))  res = 1;
-	if (!STRING_COMPARE(fextl, ".ppm"))  res = 1;
-	if (!STRING_COMPARE(fextl, ".bmp"))  res = 2;
-	if (!STRING_COMPARE(fextl, ".ras"))  res = 3;
-	if (!STRING_COMPARE(fextl, ".jp2"))  res = 4;
-	if (!STRING_COMPARE(fextl, ".jpc"))  res = 5;
-	if (!STRING_COMPARE(fextl, ".jpg"))  res = 6;
-	if (!STRING_COMPARE(fextl, ".jpeg"))  res = 6;
-	if (!STRING_COMPARE(fextl, ".jpe"))  res = 6;
-/*	if (!STRING_COMPARE(fextl, ".pgx"))  res = 7; */
-	if (!STRING_COMPARE(fextl, ".png"))  res = 8;
+	if (!STRING_COMPARE(fextl, ".bmp"))  res = 0;
+	if (!STRING_COMPARE(fextl, ".jpg"))  res = 1;
+	if (!STRING_COMPARE(fextl, ".jpeg")) res = 1;
+	if (!STRING_COMPARE(fextl, ".jpe"))  res = 1;
+	if (!STRING_COMPARE(fextl, ".png"))  res = 2;
 
 	return res;
 }
@@ -1226,231 +1209,6 @@ int BITMAP_WRITE_BMP(char *file_name)
 
 #ifndef __BMP_ONLY__
 
-/* -------------------------------------------------- */
-/* --------- BITMAP READ IN JASPER FORMAT ----------- */
-/* -------------------------------------------------- */
-int BITMAP_READ_JASPER(char *file_name)
-{
-	int i, j, channel;
-        int num_of_channels;
-	int dx, dy, clr_spc;
-	int clrspc_type;
-
-    	jas_stream_t *stream;
- 	jas_image_t *image;
-    	jas_matrix_t *data;
-
-    	/* initialize jasper library */
-	/* print info */ STRING_PRINTV("jasper initializations\n");
-	jas_init();
-
-	/* load file and decode format */
-	/* print info */ STRING_PRINTV("opening file for reading\n");
-	stream  = jas_stream_fopen(file_name, "rb");
-    	if (stream == NULL) return 1;
-
-	/* store bitmap format */
-    	bitmap_format_jpg_file_type = jas_image_getfmt(stream);
-
-	/* print info */ STRING_PRINTV("decoding jasper image\n");
-    	image = jas_image_decode(stream, -1, NULL);
-    	jas_stream_close(stream);
-	if (image == NULL) return 1;
-    	bitmap_width = jas_image_width(image);
-	bitmap_height = jas_image_height(image);
-    	clrspc_type = jas_image_clrspc(image);
-
-        if (clrspc_type == JAS_CLRSPC_SGRAY)     { bitmap_format_jpg_clrspc_type = 8;  }
-        if (clrspc_type == JAS_CLRSPC_SRGB)      { bitmap_format_jpg_clrspc_type = 24; }
-
-        if (bitmap_format_jpg_clrspc_type == 8)  { bitmap_format_png_clrspc_type = 0;  }
-        if (bitmap_format_jpg_clrspc_type == 24) { bitmap_format_png_clrspc_type = 2;  }
-        if (bitmap_format_jpg_clrspc_type == 8)  { bitmap_format_bmp_clrspc_type = 8;  }
-        if (bitmap_format_jpg_clrspc_type == 24) { bitmap_format_bmp_clrspc_type = 24; }
-
-	/* allocate memory */
-	/* print info */ STRING_PRINTV("allocating memory for uncompressed bitmap image\n");
-	bitmap_buffer = malloc(bitmap_width * bitmap_height * 3 * sizeof(*bitmap_buffer));
-	if (bitmap_buffer == 0) return 1;
-
-	/* print info */ STRING_PRINTV("dimension is "); STRING_PRINTVD(bitmap_width);
-	/* print info */ STRING_PRINTV2(" x "); STRING_PRINTVD(bitmap_height); STRING_PRINTV2(" pixels\n");
-	/* print info */ STRING_PRINTV("colors have "); STRING_PRINTVD(bitmap_format_jpg_clrspc_type);
-	/* print info */ STRING_PRINTV2(" bit depth\n");
-
-	/* check file whether it conatins 24-bit RGB or 8-bit colors */
-        clr_spc = jas_clrspc_fam(clrspc_type);
-	if ((clr_spc != JAS_CLRSPC_FAM_RGB) && (clr_spc != JAS_CLRSPC_FAM_GRAY)) return 1;
-	if (jas_image_cmptprec(image, 0) != 8) return 1;
-
-	/* create jasper matrix */
-	dx = bitmap_width;
-	dy = bitmap_height;
-	data = jas_matrix_create(dy,dx);
-
-	/* read datas out of jasper object and copy it to a memory block */
-
-	/* determine number of channels: GRAY = 1, RGB = 3 */
-        num_of_channels = 1;
-        if (clr_spc == JAS_CLRSPC_FAM_GRAY) { num_of_channels = 1; }
-        if (clr_spc == JAS_CLRSPC_FAM_RGB) { num_of_channels = 3; }
-
-	/* copy RGB colors to bitmap memory */
-	/* print info */ STRING_PRINTV("copying colors from jasper object to bitmap buffer\n");
-	for (channel=0; channel<num_of_channels; channel++){
-		jas_image_readcmpt(image, channel, 0, 0, dx, dy, data);
-		jas_image_setcmpttype(image, channel, JAS_IMAGE_CT_RGB_R+channel);
-
-		#ifdef __OPENMP__
-		#pragma omp parallel for private(i, j) num_threads(max_threads)
-		#endif
-	    	for (j=0; j<dy; j++){
-	    		for (i=0; i<dx; i++){
-	    			int idx=(j * dx + i) * 3;
-				if (num_of_channels == 1){
-					bitmap_buffer[idx+0] = jas_matrix_get(data, j, i);
-					bitmap_buffer[idx+1] = jas_matrix_get(data, j, i);
-					bitmap_buffer[idx+2] = jas_matrix_get(data, j, i); }
-				else{
-					bitmap_buffer[idx+channel] = jas_matrix_get(data, j, i); }
-			}
-		}
-	}
-
-	    /* free previously allocated objects */
-	    /* print info */ STRING_PRINTV("freeing jasper object\n");
-	    jas_image_destroy(image);
-	    jas_matrix_destroy(data);
-	    jas_image_clearfmts();
-/*	    jas_cleanup(); */
-
-	return 0;
-}
-
-
-
-
-/* -------------------------------------------------- */
-/* --------- BITMAP WRITE IN JASPER FORMAT ---------- */
-/* -------------------------------------------------- */
-int BITMAP_WRITE_JASPER(char *file_name)
-{
-	char *opt = "";
-	char opt2[max_char];
-	int fmt, clrspc_type;
-	long channel;
-	long idx;
-	long dx,dy;
-	long i, j;
-
-	jas_stream_t *stream;
- 	jas_image_t *image;
-	jas_image_cmptparm_t cmptparm[3];
-	jas_matrix_t *data;
-
-	/* initialize jasper library */
-	/* print info */ STRING_PRINTV("jasper initializations\n");
-	jas_init();
-
-	/* create jasper matrix */
-	dx = bitmap_width;
-	dy = bitmap_height;
-	data=jas_matrix_create(dy,dx);
-
-        clrspc_type = 0;
-        if (bitmap_format_jpg_clrspc_type == 8)  { clrspc_type = JAS_CLRSPC_SGRAY; }
-        if (bitmap_format_jpg_clrspc_type == 24) { clrspc_type = JAS_CLRSPC_SRGB;  }
-
-	/* create new jasper imgae object */
-	for (i=0; i<3; i++){
-		cmptparm[i].tlx		= 0;
-		cmptparm[i].tly		= 0;
-		cmptparm[i].hstep	= 1;
-		cmptparm[i].vstep	= 1;
-		cmptparm[i].height	= dy;
-		cmptparm[i].width	= dx;
-		/* number of bits per channel */
-		cmptparm[i].prec	= 8;
-		cmptparm[i].sgnd	= 0;
-	}
-	image = jas_image_create(3, cmptparm, clrspc_type);
-
-	/* read data out of memory block and copy it into jasper object */
-	/* print info */ STRING_PRINTV("copying colors from bitmap buffer to jasper object\n");
-	for (channel=0; channel<3; channel++){
-		#ifdef __OPENMP__
-		#pragma omp parallel for private(i, j, idx) num_threads(max_threads)
-		#endif
-		for (j=0; j<dy; j++){
-			for (i=0; i<dx; i++){
-				idx=(j * dx + i) * 3;
-				jas_matrix_set(data, j, i, bitmap_buffer[idx+channel]);
-	    		}
-		}
-		jas_image_writecmpt(image, channel, 0, 0, dx, dy, data);
-		jas_image_setcmpttype(image, channel, JAS_IMAGE_CT_RGB_R+channel);
-	}
-
-/*	int fmt = GET_FILE_FORMAT(file_name); */
-/*	if ((fmt < 0) || (fmt > 7)) return 1; */
-	fmt = bitmap_format_jpg_file_type;
-
-	/* set quality value */
-	if (opt_quality < 0)  { opt_quality = 0;   }
-	if (opt_quality > 100){ opt_quality = 100; }
-	if (!(opt_quality)){
-		if (fmt == 4) opt = "rate=0.95";
-		if (fmt == 5) opt = "rate=0.95";
-		if (fmt == 6) opt = "quality=95";
-	}
-	else{
-		if ((fmt == 4) || (fmt == 5)){
-	    		opt = "rate=1.00\0";
-	    		for (i=0; opt[i]!='\0'; i++){ opt2[i] = opt[i]; } opt2[i] = opt[i];
-	    		if (opt_quality < 100){
-	    			opt2[5] = '0';
-	    			opt2[7] = '0' + (opt_quality / 10);
-	    			opt2[8] = '0' + (opt_quality % 10);
-	    		}
-	    		opt = opt2;
-	    	}
-	    	if (fmt == 6){
-	    		opt = "quality=100\0";
-	    		for (i=0; opt[i]!='\0'; i++){ opt2[i] = opt[i]; } opt2[i] = opt[i];
-	    		if (opt_quality < 100){
-	    			opt2[10] = '\0';
-	    			opt2[8] = '0' + (opt_quality / 10);
-	    			opt2[9] = '0' + (opt_quality % 10);
-	    		}
-	    		opt = opt2;
-	    	}
-	    }
-
-	    /* open file for writing and encode format */
-	    /* print info */ STRING_PRINTV("opening file for writing\n");
-    	    stream = jas_stream_fopen(file_name,"w+b");
-
-	    /* print info */ STRING_PRINTV("encoding jasper image\n");
-	    jas_image_encode(image, stream, fmt, opt);
-
-	    /* write file */
-	    /* print info */ STRING_PRINTV("writing image file\n");
-	    jas_stream_flush(stream);
-	    jas_stream_close(stream);
-
-	    /* free previously allocated objects */
-	    /* print info */ STRING_PRINTV("freeing jasper object\n");
-	    jas_image_destroy(image);
-	    jas_matrix_destroy(data);
-	    jas_image_clearfmts();
-/*	    jas_cleanup(); */
-
-	return 0;
-}
-
-
-
-
 /* ----------------------------------------------- */
 /* --------- BITMAP READ IN PNG FORMAT ----------- */
 /* ----------------------------------------------- */
@@ -2126,8 +1884,8 @@ int BITMAP_LOAD(char *file_name)
 	fclose(fhandle);
 
     /* print info */ STRING_PRINTV("file exists\n");
-    /* if it's a BMP format, then load BMP with custom procedure (and not jasper) */
-    if (GET_FILE_FORMAT(file_name) == 2){
+    /* if it's a BMP format, then load BMP with custom procedure */
+    if (GET_FILE_FORMAT(file_name) == 0){
         if (BITMAP_READ_BMP(file_name)) return 1;
     }
     else{
@@ -2139,22 +1897,18 @@ int BITMAP_LOAD(char *file_name)
 #ifndef __BMP_ONLY__
 
 
-	/* if it's a PNG format, then load that one */
-        if (GET_FILE_FORMAT(file_name) == 8){
-            if (BITMAP_READ_PNG(file_name)) return 1;
-            return 0;
-        }
-
-	/* if it's a JPEG, then save exif info and load image with libjpeg (and not libjasper) */
-        if (GET_FILE_FORMAT(file_name) == 6){
+	/* if it's a JPEG, then save exif info and load image with libjpeg */
+        if (GET_FILE_FORMAT(file_name) == 1){
             if (BITMAP_READ_JPEG(file_name)) return 1;
             return 0;
         }
 
-	/* in every other case, load jasper format */
-	/* because anyway there are no other supported formats */
-	/* and jasper will signal if it's not one of its supported ones */
-        if (BITMAP_READ_JASPER(file_name)) return 1;
+	/* if it's a PNG format, then load that one */
+        if (GET_FILE_FORMAT(file_name) == 2){
+            if (BITMAP_READ_PNG(file_name)) return 1;
+            return 0;
+        }
+
         return 0;
 
 
@@ -2174,10 +1928,10 @@ int BITMAP_LOAD(char *file_name)
 int BITMAP_SAVE(char *file_name)
 {
     /* if the format is not JPEG, then clear exif info (memory is freed) */
-    if (GET_FILE_FORMAT(file_name) != 6){ EXIF_CLEAR(); }
+    if (GET_FILE_FORMAT(file_name) != 1){ EXIF_CLEAR(); }
 
-    /* if it's a BMP format, then save BMP with custom procedure (and not with jasper) */
-    if (GET_FILE_FORMAT(file_name) == 2){
+    /* if it's a BMP format, then save BMP with custom procedure */
+    if (GET_FILE_FORMAT(file_name) == 0){
         if (BITMAP_WRITE_BMP(file_name)) { free(bitmap_buffer); return 1; }
 
 	/* free memory on success */
@@ -2196,20 +1950,8 @@ int BITMAP_SAVE(char *file_name)
 #ifndef __BMP_ONLY__
 
 
-    /* if it's a PNG, then save PNG */
-    if (GET_FILE_FORMAT(file_name) == 8){
-        if (BITMAP_WRITE_PNG(file_name)) {
-   	    /* print info */ STRING_PRINTV("freeing uncompressed bitmap buffer\n");
-	    free(bitmap_buffer); return 1; }
-
-	/* free memory on success */
-	/* print info */ STRING_PRINTV("freeing uncompressed bitmap buffer\n");
-	free(bitmap_buffer);
-	return 0;
-    }
-
     /* if it's a JPEG, then save it */
-    if (GET_FILE_FORMAT(file_name) == 6){
+    if (GET_FILE_FORMAT(file_name) == 1){
         if (BITMAP_WRITE_JPEG(file_name)) {
 	    /* print info */ STRING_PRINTV("freeing uncompressed bitmap buffer\n");
 	    free(bitmap_buffer); return 1; }
@@ -2220,13 +1962,18 @@ int BITMAP_SAVE(char *file_name)
 	return 0;
     }
 
-
-    /* in every other case, save jasper format */
-    /* because anyway there are no other supported formats */
-    /* and jasper will signal if it's not one of its supported ones */
-    if (BITMAP_WRITE_JASPER(file_name)) {
-	    /* print info */ STRING_PRINTV("freeing uncompressed bitmap buffer\n");
+    /* if it's a PNG, then save PNG */
+    if (GET_FILE_FORMAT(file_name) == 2){
+        if (BITMAP_WRITE_PNG(file_name)) {
+   	    /* print info */ STRING_PRINTV("freeing uncompressed bitmap buffer\n");
 	    free(bitmap_buffer); return 1; }
+
+	/* free memory on success */
+	/* print info */ STRING_PRINTV("freeing uncompressed bitmap buffer\n");
+	free(bitmap_buffer);
+	return 0;
+    }
+
 
     /* free memory on success */
     /* print info */ STRING_PRINTV("freeing uncompressed bitmap buffer\n");
