@@ -2,9 +2,9 @@ Auto Adjust Photo
 Copyright (C) 2006-2016 Andras Horvath
 E-mail: mail@log69.com - suggestions & feedbacks are welcome
 URL: http://log69.com/aaphoto_en.html - the official site
-aaphoto (command-line) version - v0.44
+aaphoto (command-line) version - v0.45
 aaRGB (color-correction engine) version - v0.64
-last update = 02/07/2016
+last update = 09/07/2016
 
 The following libraries are used by this program:
 libgomp - OpenMP for parallel programming, 

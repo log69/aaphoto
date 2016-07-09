@@ -30,6 +30,7 @@
 /*
 aaphoto Changelog:
 --------------------
+2016/07/09 - aaphoto v0.45 - fix libpng error: unrecognized unit type for pHYs chunk
 2016/07/02 - aaphoto v0.44 - remove libjasper dependency because it gets removed from Debian 9
                              and anyway it supported file formats that nobody used
 2013/09/30 - aaphoto v0.43 - new aaRGB v0.65 version update (see aaRGB changelog)
@@ -267,9 +268,9 @@ STRING_PRINT("Auto Adjust Photo\n");
 STRING_PRINT("Copyright (C) 2006-2016 Andras Horvath\n");
 STRING_PRINT("E-mail: mail@log69.com - suggestions & feedbacks are welcome\n");
 STRING_PRINT("URL: http://log69.com/aaphoto_en.html - the official site\n");
-STRING_PRINT("aaphoto (command-line) version - v0.44\n");
+STRING_PRINT("aaphoto (command-line) version - v0.45\n");
 STRING_PRINT("aaRGB (color-correction engine) version - v0.65\n");
-STRING_PRINT("last update = 02/07/2016\n");
+STRING_PRINT("last update = 09/07/2016\n");
 STRING_PRINT("\n");
 #ifndef __BMP_ONLY__
 STRING_PRINT("The following libraries are used by this program:\n");
