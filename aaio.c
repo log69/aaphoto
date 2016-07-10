@@ -1616,7 +1616,6 @@ int BITMAP_WRITE_PNG(char *file_name)
 /*	png_set_packing(png_ptr); */
 
 
-        png_read_update_info(png_ptr, info_ptr);
         rowbytes = png_get_rowbytes(png_ptr, info_ptr);
 
 	row_pointers = malloc(bitmap_height * sizeof (long));
