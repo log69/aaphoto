@@ -1609,8 +1609,7 @@ int BITMAP_WRITE_PNG(char *file_name)
 		PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
         /* set image resolution */
-		/* png_set_pHYs(png_ptr, info_ptr, xdpi, ydpi, udpi); */
-		png_set_pHYs(png_ptr, info_ptr, xdpi, ydpi, PNG_RESOLUTION_METER);
+        png_set_pHYs(png_ptr, info_ptr, xdpi, ydpi, udpi);
 
 
 	png_write_info(png_ptr, info_ptr);
