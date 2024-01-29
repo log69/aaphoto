@@ -403,46 +403,44 @@ void AARGB_MAIN(
 /* ------------------------------------------------------------------------------ */
 /* Initialization and constants for the contrast and gamma (0...1) */
 /* ------------------------------------------------------------------------------ */
-/* Kezdõ értékek és konstansok megadása a kontraszt és gamma mûveletekhez */
+/* Initial values and constants definition for contrast and gamma operations */
 
-/* Kontraszt konstans megadása: megadja, hogy mekkora lehet az automata */
-/* kontraszt állítás maximum értéke (0...1-ig terjedhet az értéke), */
-/* alapértelmezett = 0.1 */
-/* Gamma konstans megadása: megadja, hogy mekkora lehet az automatikus */
-/* gamma állítás maximum értéke (1...10-ig ajánlott), */
-/* alapértelmezett = 1.5 */
+/* Contrast constant definition: specifies the maximum value for automatic */
+/* contrast adjustment (ranging from 0 to 1), */
+/* default = 0.1 */
+/* Gamma constant definition: specifies the maximum value for automatic */
+/* gamma adjustment (recommended range 1 to 10), */
+/* default = 1.5 */
 
-/* Gamma állításhoz a maximum elõfordulás értékének megadása (occur_max), */
-/* amely megadja, hogy a gamma érték számításánál ha ennél kisebb az */
-/* elõfordulása a nagy mértékben elõforduló színeknek, akkor kihagyjuk õket a */
-/* számításból, vagyis a nagy mértékben elõforduló színeket azért nem vesszük */
-/* be a számításba, mert inkább a részletek látszódjanak jól, */
-/* vagyis a részletekhez legyen inkább kiszámolva a megfelelõ fényerõ */
-
+/* For gamma adjustment, specifying the maximum occurrence value (occur_max), */
+/* which indicates that in calculating gamma value, if the occurrence of */
+/* predominant colors is less than this, they are omitted from */
+/* the calculation, meaning that predominant colors are not considered */
+/* because the focus is on making details visible, */
+/* i.e., the brightness is calculated preferably for details */
 
 /* ------------------------------ */
-/* Konstans értékek beállítása */
+/* Setting constant values */
 /* ------------------------------ */
-    /* maximális kontraszt mértéke (0..1) */
+    /* maximum contrast level (0..1) */
     cont_max = 0.066666;
 
-    /* maximális gamma korrekció mértéke (1..10) */
+    /* maximum gamma correction level (1..10) */
     gamma_max = 1.5;
     gamma_interval_low = 0.333;
     gamma_interval_high = 1;
 
-    /* maximális színtelítettség limit (0..1) */
+    /* maximum saturation limit (0..1) */
     satur_max = 0.333;
 
     bw = image_width;
     bh = image_height;
 
-    /* Kijelölt területhez a koordináták határértékeinek vizsgálata */
-    /* és megfelelõ beállítása */
-    /* A kijelölés célja, hogy egy meghatározott képrészletet szeretnénk jól */
-    /* láthatóvá tenni (nem pedig az egészet arányaiban) */
+    /* Checking and setting boundary values of coordinates for the selected area */
+    /* The purpose of the selection is to make a specific part of the image */
+    /* visible (not to proportionally adjust the entire image) */
 
-    /* a szélesség konvertálása abszolút koordinátává, jelenleg nem él */
+    /* converting width to absolute coordinates, currently inactive */
     /* x2 = x1 + x2 - 1; */
     /* y2 = y1 + y2 - 1; */
 
@@ -454,10 +452,10 @@ void AARGB_MAIN(
     if (x2 > bw-1) { x2 = bw-1; }
     if (y1 > bh-1) { y1 = bh-1; }
     if (y2 > bh-1) { y2 = bh-1; }
-    /* A DIB formátum 4-byte-os igazításához az eltolás értékének kiszámítása */
-    /* Normál tömbnél erre nincs szükség, ekkor a format_flag értéke = 0 */
-    /* egyébként a DIB formátumú tömb függõlegesen fordított sorokat tartalmaz, */
-    /* és a sorvégek 4 byte-tal vannak igazítva */
+    /* Calculating the offset value for the 4-byte alignment in DIB format */
+    /* This is not necessary for a normal array, in which case the format_flag value = 0 */
+    /* otherwise, in the DIB format, the rows are vertically inverted, */
+    /* and the row ends are aligned with 4 bytes */
     addr_offset = 0;
     /* Format = 0 --> NORMAL 3 byte RGB data in array */
     /* Format = 1 --> DIB data format in array */
@@ -468,25 +466,23 @@ void AARGB_MAIN(
         addr_offset = bw * 3 - 4 * (bw * 3 / 4);
         if (addr_offset) addr_offset = 4 - addr_offset;
     }
-    /* Kijelölés koordinátáinak felcserélése, ha nem jó sorrendben adták meg, */
-    /* vagyis a bal felsõ sarok az x1 és y1, a jobb alsó pedig az x2 és y2 */
+    /* Swapping selection coordinates if they are not given in correct order, */
+    /* i.e., the top left corner is x1 and y1, the bottom right is x2 and y2 */
     if (x1 > x2) { i1 = x1; x1 = x2; x2 = i1; }
     if (y1 > y2) { i1 = y1; y1 = y2; y2 = i1; }
+
 
 
 /* ------------------------------------------------------------------------------ */
 /* Create Histogram and average RGB colors for the Image */
 /* ------------------------------------------------------------------------------ */
-/* Hisztogram generálása a kép színeibõl, ami a kép feényerõ eloszlását adja meg */
-/* plusz a színegyensúly beállításához az egy fényerejû színek átlag RGB */
-/* értékeinek letárolása, megelõlegezve egy késõbbi rutin munkáját */
+/* Generating a histogram from the colors of the image, which represents the distribution of brightness in the image */
+/* plus storing the average RGB values of colors with the same brightness, in anticipation of the work of a future routine */
 
-/* A kép minden egyes pontjának átlag fényereje (szürkéje) bekerül egy */
-/* 256 elemû tömbbe, ahol a fényerejük értéke az azonos indexû elem értékét */
-/* 1-gyel növeli */
+/* The average brightness (grayness) of each point in the image is included in a */
+/* 256-element array, where the brightness value increases the value of the corresponding index in the array by 1 */
 
-/* Így ez a hisztogram tömb pontos leírást ad a feketétõl a fehérig terjedõ */
-/* színskálájáról a képnek */
+/* Thus, this histogram array gives an accurate description of the color scale of the image from black to white */
 
     /* array initialization with zeros */
     #ifdef __OPENMP__
@@ -524,10 +520,9 @@ void AARGB_MAIN(
 #else
 		N = 0;
 #endif
-                /* szürke hisztogramm */
+                /* gray histogram */
                 hist1n[cc + N*256]++;
-                /* Átlag RGB értékek letárolása a fekete és fehér pont */
-                /* átlag RGB-jének későbbi megállapításához */
+                /* Storing average RGB values for determining the average RGB of black and white points later */
                 col_r3n[cc + N*256] += col_r;
                 col_g3n[cc + N*256] += col_g;
                 col_b3n[cc + N*256] += col_b;
@@ -552,32 +547,31 @@ void AARGB_MAIN(
 /* ------------------------------------------------------------------------------ */
 /* Start analyzing to find the White and Black points */
 /* ------------------------------------------------------------------------------ */
-/* Az automata kontraszt beállításához a Fekete és Fehér pont megállapítása */
+/* Determining the Black and White points for automatic contrast adjustment */
 
-/* A hisztogram bal és jobb oldaláról elkezdem beolvasni a szürke értékek */
-/* nagyságát és addig olvasom be, amíg az nem nagyobb egy elõre meghatározott */
-/* értéknél, ekkor megkapom a fekete és fehér pont helyzetét */
+/* I start reading the magnitude of gray values from the left and right sides of the histogram */
+/* and keep reading until it exceeds a predetermined value, at which point I obtain */
+/* the positions of the black and white points */
 
-/* Ez az elõre meghatározott érték a kontraszt konstans és a hisztogram */
-/* összes tömbeleme átlagának a szorzata */
-/* Az átlag szorzat egyensúlyt teremt a határérték elérésénél, mert egyébként */
-/* ha ez az érték mondjuk a hisztogram maximum értéke lenne, akkor */
-/* drasztikus kontraszt túlállítás jellemezné a funkciót */
+/* This predetermined value is the product of the contrast constant and the average */
+/* of all elements in the histogram */
+/* The average product creates a balance at the limit value, because otherwise */
+/* if this value were, say, the maximum value of the histogram, then */
+/* it would characterize the function with drastic contrast over-adjustment */
 
-/* Vagyis ez az érték azt adja meg, hogy a kép átlag fényerejének hány */
-/* százaléka az az érték, amely a továbbiakban megadja, hogy az ekkora */
-/* százalék alatt található feketék és fehérek lesznek kihúzva a határig (le lesznek vágva)*/
+/* In other words, this value indicates what percentage of the average brightness of the image */
+/* is the threshold beyond which blacks and whites found below this percentage will be clipped to the limit (cut off) */
 
     hist_min = bw * bh;
     hist_max = 0;
     hist_avg = 0;
 
-    /* Átlag fényerõ kiszámítása: ezt úgy kapom meg, hogy összeadom a histogramm
-    összes oszlopát és osztom 256-al (oszlopok száma), vagyis matematikai átlaga.
-    Ezt még leosztom egy konstanssal (10%-ára alapból) úgy, hogy nullánál kisebbel szorzok,
-    az így kapott értéket nevezem itt limit-nek.
+    /* Calculating average brightness: I get this by summing up all columns of the histogram 
+    and dividing by 256 (number of columns), that is the mathematical average.
+    Then I further divide it by a constant (to 10% by default) by multiplying with a number less than zero,
+    the resulting value here is called the limit.
 
-    (a maximum és minimum érték számítása csak tesztelési céllal él)
+    (calculation of maximum and minimum values is only for testing purposes)
     */
     for (i1=0; i1<256; i1++){
         temp1 = hist1[i1];
@@ -585,10 +579,10 @@ void AARGB_MAIN(
         if (hist_max < (long)temp1){ hist_max = (long)temp1; }
         hist_avg = hist_avg + temp1;
     }
-    /* histogram teljes összege */
+    /* total sum of the histogram */
 /*    hist_sum = hist_avg; */
 
-    /* histogram matematikai átlag értéke */
+    /* mathematical average value of the histogram */
     hist_avg = hist_avg / 256;
 
 /*
@@ -597,13 +591,13 @@ void AARGB_MAIN(
     hist_avg_test = hist_avg;
 */
 
-    /* ez lesz itt a limit */
+    /* this is the limit */
     temp1 = hist_avg * cont_max;
     hist_cut_limit = temp1;
 
 
 
-    /* fehér és feketepont keresése 0 (nulla) maximumig */
+    /* searching for white and black points up to 0 (zero) maximum */
 
     bp = 255;
     flag1 = 0;
@@ -646,54 +640,51 @@ void AARGB_MAIN(
 
 
     /* -----------------------------------------------------------------------------------
-    Az automatikus kontraszt állító algoritmus néha olyan bemenetet is kaphat,
-    ahol a részletek a képen túl kis mennyiségben vannak jelen, és nagy terjedelmű
-    egy színű részek a jellemzőek - ekkor az volt a jelenség, hogy az algoritmus
-    túl nagyot vág le a hisztogram széléből, és az ezen a képen fontosabb kis mennyiségű
-    részlet veszik el.
+    The automatic contrast adjustment algorithm sometimes receives inputs,
+    where the details are too sparse in the image, and large areas of a single color dominate - in these cases, the phenomenon was
+    that the algorithm cuts too much from the edges of the histogram, and the important small details
+    on these images are lost.
     
-    Ezért beillesztettem az algoritmusba egy önszabályozó mechanizmust, amelynél ha
-    felmerül a fenti eset, akkor jó esély van rá, hogy a részletek maradnak meg inkább
-    a kontraszt állítás után.
+    Therefore, I have incorporated a self-regulating mechanism into the algorithm, which, in the event of the above situation,
+    increases the likelihood that the details will be preserved after contrast adjustment.
     
-    Ez úgy történik, hogy megnézem, mennyi oszlop esik a limit érték alá, és ennek függvényében
-    tovább csökkentem ezt a limit-et, mivel minél több rész esik az átlag alá (oszlopok száma a hisztogramban),
-    ez azt jelenti hogy annál több a képen az olyan érdekes részlet, amely levágásra kerülne,
-    ezért a sok és meghatározó nagy üres részek kevésbé kellene hogy számítsanak.
+    This is done by checking how many columns fall below the limit value, and depending on this,
+    I further reduce this limit, because the more portions that fall below the average (number of columns in the histogram),
+    it means that there are more interesting details on the image that would be cut off,
+    hence the many and significant large empty areas should matter less.
 
-    A limit értéket az alábbi módon húzom tovább lefelé: újra fogom kalkulálni az átlagot
-    és ezt a limit értéket is úgy, hogy a kalkuláció során az ez fölé eső oszlop értékek
-    kevésbé számítsanak, ha minél több az előzőkben a limit érték alatti részek oszlopainak száma,
-    és ha ezen oszlopok magasságának összegei is minél kisebbek,
-    mert így tudjuk meg, hogy egyre kisebb területen van az értékes részlet.
+    The limit value is further reduced as follows: I recalculate the average
+    and this limit value in such a way that during the calculation, the column values above this
+    count less if there are more columns below the previous limit value,
+    and if the sum of the heights of these columns is also smaller,
+    because this tells us that the valuable detail is located on an increasingly smaller area.
     
-    Ez így egy önfékező folyamatot eredményez a nagy üres területek átlaga okozta túl nagy limit értékhez,
-    és ezzel a túl nagy kontraszt levágáshoz, ahol is pont a részlet veszik el.
+    This results in a self-braking process for the too high limit value caused by the average of large empty areas,
+    and thereby to the too drastic contrast cut, where the detail is lost.
 
-    Ezek után újra kalkulálom ezt a limit értéket az előző módon,
-    és ezzel lesz tovább kalkulálva a histogram szélek levágása.
+    After this, I recalculate this limit value in the previous manner,
+    and this will be used for further calculation of the histogram edge cuts.
     
-    Hogy mennyire számítson a kis kép részlet, azt is analóg módon akarom eldönteni,
-    tehát úgy, hogy az eredeti limit érték módosulása ne szakaszos módon történjen,
-    viszont mivel úgy gondolom, hogy olyan görbére van szükségem, amely a 0-1 intervallumon
-    a feléig nagyon kicsit emelkedik, majd innét drasztikusabban,
-    ezért az 5. hatványt szorozva 3-mal találtam a megfelelőnek.
+    To what extent the small image detail should count, I want to decide in an analogous manner,
+    so that the change in the original limit value does not happen in a stepwise fashion,
+    but since I believe I need a curve that rises very little until the midpoint of the 0-1 interval, and then more drastically,
+    I found multiplying by the 5th power times 3 to be appropriate.
     
     f(x) = x^5*3
-    Wolphram Aplha link a szemléltetéshez:
+    Wolfram Alpha link for illustration:
     http://www.wolframalpha.com/input/?i=x^5+*+3+from+0+to+1
     
-    Ennek mentén, ha a kis és nagy részlet egyensúly felborul, akkor
-    a 0.5 től felfelé kezd a kontraszt számítás egyre kevésbé drasztikusba átmenni,
-    és ezzel érem el, hogy a kisebb értékek lehetőleg minél kevésbé,
-    míg a nagyobb értékek egyre jobban folyásolják be ezt.
+    According to this, if the balance between small and large details is upset, then
+    from 0.5 upwards, the contrast calculation becomes progressively less drastic,
+    and this is how I achieve that the smaller values influence as little as possible,
+    while the larger values influence more and more.
     -------------------------------------------------------------------------------------- */
 
 
-    /* azért csak a fekete és fehér pont közötti szakaszt vizsgálom
-       (ez a hisztogramm megmaradó szélessége a bal és jobb oldali levágás után)
-       mert a tervezett végleges eredményen akarom vizsgálni a részlet mennyiségének arányát
-       a teljes terjedelemhez képest (amennyi maradna belőle).
+    /* I only examine the section between the black and white points
+       (this is the remaining width of the histogram after the cuts from the left and right sides)
+       because I want to examine the proportion of detail to the total extent
+       of the intended final result (how much would remain of it).
     */
 
     hist_cut_columns = 0;
@@ -706,54 +697,54 @@ void AARGB_MAIN(
     }
 
 
-    /* temp1 mutatja az eredeti levágandó limit értéket,
-       hist_cut_columns mutatja a limit alatti oszlopok számát (ezt nevezem limit alatti részletnek),
-       hist_cut_weight mutatja ezen oszlopok értékének összegét (súlyát),
+    /* temp1 shows the original limit value to be cut,
+       hist_cut_columns shows the number of columns below the limit (I call this detail below the limit),
+       hist_cut_weight shows the sum of the values of these columns (their weight),
 
-       temp2-t pedig úgy állítom be, hogy minél nagyobb súly oszlik el kevesebb oszlop számon
-       (vagyis minél kevesebb oszlop van a limit alatt és ezeknek a súlya minél nagyobb),
-       úgy ennek is annál nagyobb lesz az értéke - vagyis ha temp2-nek nagyobb az értéke,
-       az azt jelenti hogy annál több értékes részlet van a limit alatt.
+       temp2 is set in such a way that the greater the weight spread over fewer column numbers
+       (i.e., the fewer columns are below the limit and their weight is greater),
+       the greater its value will be - so if temp2 has a greater value,
+       it means that there are more valuable details below the limit.
        
-       azért nevezem a limit alatti oszlopokat értékesebb részletnek, mert a teljes hisztogramm átlagot
-       elhúzzák felfelé a nagy egyszínű részek, amelyek kevés oszlopok nagy súllyal,
-       vagyis ezek nyilván nagyobb terjedelmű üres részek - tehát ezek maguk a "nem" részletek,
-       míg ezen átlag alattiakat veszem a részletnek.
+       I call the columns below the limit more valuable details, because the average of the entire histogram
+       is skewed upwards by the large single-color areas, which are few columns with high weight,
+       i.e., these are obviously large extent empty areas - hence they are the "non" details,
+       while I consider those below the average to be the detail.
        
-       mivel a limit alatti oszlopokat nézzük, ezért leosztva magával a limit értékkel, egy
-       0..1 intervallumos arány értéket kapok.
+       Since we are looking at the columns below the limit, dividing by the limit value itself gives a
+       ratio value in the 0..1 interval.
     */
     if ((hist_cut_columns == 0) || (temp1 == 0)){ temp2 = 0; }
     else { temp2 = (double)(hist_cut_weight) / hist_cut_columns / temp1; }
 
 
-    /* itt temp3 értékét úgy határozom meg, hogy az eredeti limit alatti oszlopok számát
-       osztom a histogram középső (levágás utáni) megmaradt szélességével (wp-bp)
-       (de csak a megmaradandó szakaszon, ezért az eredmény 0..1 közötti lesz),
+    /* here I determine the value of temp3 by dividing the number of columns below the original limit
+   by the remaining (post-cut) middle width of the histogram (wp-bp)
+   (but only within the remaining section, therefore the result will be between 0..1),
 
-       vagyis minél nagyobb rész esik le bal és jobb oldalt, annál kisebb értékkel osztunk,
-       és ha a limit alatti oszlopok száma egyre több, akkor ezt minél kisebb értékkel osztva
-       annál nagyobb számot kapunk, ezért annál drasztikusabbnak vehetjük az eredetileg alkalmazandó kontrasztot,
-       és ezért ezt az értéket az 5. hatványra emelve és szorozva 3-mal - olyan értéket eredményez,
-       mely 50% fölött egyre nagyobb értéket ad vissza, és itt minél nagyobb az érték,
-       annál jobban csökkentem az eredeti tervezett kontraszt (levágás) mértékét.
+   meaning the more parts that fall off on the left and right sides, the smaller the value we divide by,
+   and if the number of columns below the limit increases, dividing by this smaller value
+   will yield a larger number, hence we can consider the originally applied contrast to be more drastic,
+   and thus raising this value to the 5th power and multiplying by 3 results in a value
+   that gives back an increasingly larger value above 50%, and the larger this value,
+   the more I reduce the original planned contrast (cut) measure.
     */
     temp3 = (double)(hist_cut_columns) / (wp-bp);
 
-    /* itt a lineáris értéket hatványra emeléssel görbítem, hogy a kisebb értékek kevésbé,
-    míg a nagyobb értékek egyre jobban befolyásolják az eredményt */
+    /* here I curve the linear value by raising it to a power, so that smaller values have less,
+    while larger values increasingly influence the result */
     temp3 = temp3 * temp3 * temp3 * temp3 * temp3 * 3;
     if (temp3 > 1){ temp3 = 1; }
 
-    /* itt temp1 (eredeti limit érték) alatt keletkezett temp2 (új limit érték)
-       limit vonalat visszahúzom felfelé az eredeti temp1 felé a temp3-as görbe alapján.
-       
-       vagyis a drasztikus kontrasztot lecsökkentettem, majd vissza engedem a görbe alapján
-       (amelynél kb. 50% után görbül drasztikusan).
+    /* here I pull back the limit line created by temp2 (new limit value) under temp1 (original limit value)
+    upwards towards the original temp1 based on the temp3 curve.
+    
+    meaning I reduced the drastic contrast, and then allow it back based on the curve
+    (which curves drastically after about 50%).
     */
     temp3 = temp1 - ((temp1 - temp2) * temp3);
-    /* itt nem engedem hogy az új csökkentett limit érték az eredeti 10% alá menjen,
-       ez csupán egy alsó korlát a kontraszt csökkentés mértékéhez */
+    /* here I prevent the new reduced limit value from going below 10% of the original,
+    this is just a lower limit for the extent of contrast reduction */
     if (temp3 < temp1 * 0.1){ temp1 = temp1 * 0.1; }
     else{ temp1 = temp3; }
 
@@ -765,8 +756,8 @@ void AARGB_MAIN(
     bp = 255;
     flag1 = 0;
 
-    /* histogram jobb oldaláról lépkedek és vágom majd le addig az értékig,
-    amely még kisebb mint az átlag * cont_max (átlag 10 %-a) */
+    /* I step from the right side of the histogram and cut off up to the value,
+    which is still smaller than the average * cont_max (10% of the average) */
     for (i1=0; i1<256; i1++){
         if (flag1 == 0){
             if (hist1[i1] >= temp1){
@@ -789,7 +780,7 @@ void AARGB_MAIN(
         }
     }
 
-    /* Határértékek beállítása és korrekciója */
+    /* Setting and correcting boundary values */
     if (bp > wp){
         i1 = (long)(wp);
         wp = bp;
@@ -812,23 +803,22 @@ void AARGB_MAIN(
 /* ------------------------------------------------------------------------------ */
 /* Get the average RGB values for the White and Black points */
 /* ------------------------------------------------------------------------------ */
-/* A színegyensúly beállításához az átlag RGB értékek kiszámítása */
-/* a fekete és fehér pont értéke alapján */
+/* Calculating the average RGB values for color balance adjustment */
+/* based on the black and white point values */
 
-/* Itt keletkezik egy átlag RGB érték a fekete és fehér pontokhoz egyaránt */
-/* Ez az érték azt adja meg, hogy az automatikus kontraszt állításakor */
-/* minden egyes szín milyen irányba torzul lefelé (fekete pont RGB átlaga) */
-/* és felfelé (fehér pont RGB átlaga) */
+/* Here, an average RGB value is generated for both the black and white points */
+/* This value indicates how each color skews downward (average RGB of the black point) */
+/* and upward (average RGB of the white point) during automatic contrast adjustment */
 
-/* A fehér pont feletti összes szín átlagának RGB-je lesz a viszonyítási pont */
-/* a fehér írányába való torzításhoz, */
-/* vagyis ez lesz kihúzva a tökéletes fehérbe */
+/* The average RGB of all colors above the white point will be the reference point */
+/* for distortion towards white, */
+/* i.e., this will be extended to perfect white */
 
-/* Ez valóságban a kép színegyensúlyát állítja be megfelelõen úgy, hogy a */
-/* levágandó mértékû fehérek színátlaga lesz a tökéletes fehér, */
-/* ezért ha ezek átlaga nem tökéletes fehér, akkor az ettõl eltérõ nagyságot */
-/* minden színnél arányosan el kell tolni a tökéletes fehér irányába, */
-/* ugyanez a fekete estében */
+/* In reality, this sets the color balance of the image appropriately so that the */
+/* color average of the whites to be cut off becomes the perfect white, */
+/* therefore, if their average is not perfect white, then the deviation from it */
+/* should be proportionally shifted towards perfect white for all colors, */
+/* and the same applies to the black point */
 
     bp_r = 0;
     bp_g = 0;
@@ -838,7 +828,7 @@ void AARGB_MAIN(
     wp_b = 0;
 
     i3 = 0;
-    /* fekete pont alatti összes szín RGB átlagának kiszámítása */
+    /* Calculating the average RGB of all colors below the black point */
     #ifdef __OPENMP__
     #pragma omp parallel for reduction(+:bp_r, bp_g, bp_b, i3) num_threads(max_threads2)
     #endif
@@ -856,7 +846,7 @@ void AARGB_MAIN(
     }
 
     i3 = 0;
-    /* fehér pont feletti összes szín RGB átlagának kiszámítása */
+    /* Calculating the average RGB of all colors above the white point */
     #ifdef __OPENMP__
     #pragma omp parallel for reduction(+:wp_r, wp_g, wp_b, i3) num_threads(max_threads2)
     #endif
@@ -872,7 +862,7 @@ void AARGB_MAIN(
         wp_b = wp_b / i3;
     }
 
-    /* skálázás 255-ről a [0..1] intervallumra */
+    /* Scaling from 255 to the [0..1] interval */
     bp_r = bp_r / 255;
     bp_g = bp_g / 255;
     bp_b = bp_b / 255;
@@ -880,13 +870,13 @@ void AARGB_MAIN(
     wp_g = wp_g / 255;
     wp_b = wp_b / 255;
 
-    /* A kapott átlag RGB érték fényerejének visszaállítása a fehér pont szintjére. */
-    /* Mivel ugye nem csak a fehér pont fényerejével azonos színeknek kalkuláltuk ki */
-    /* az átlag színét, hanem az attól világosabb összes színnek, ezért a kapott */
-    /* átlag szín fényereje nagyobb vagy egyenlő lesz, mint a kiindulási fehér pont */
-    /* ezért a korrekcióhoz visszaállítjuk az RGB érték fényerejét */
-    /* de az R, G és B komponensek arányának a megtartásával */
-    /* és ugyanez a fekete pont esetében */
+    /* Restoring the brightness of the obtained average RGB value to the white point level. */
+    /* Since we did not only calculate the average color for colors with the same brightness as the white point */
+    /* but for all colors brighter than that, the brightness of the obtained */
+    /* average color will be greater or equal to the starting white point */
+    /* therefore, for correction, we restore the brightness of the RGB value */
+    /* while maintaining the ratio of the R, G, and B components */
+    /* and the same applies to the black point */
     RGB_TO_HSL (bp_r, bp_g, bp_b, &H, &S, &L);
     L = bp;
     HSL_TO_RGB (H, S, L, &bp_r, &bp_g, &bp_b);
@@ -894,21 +884,19 @@ void AARGB_MAIN(
     L = wp;
     HSL_TO_RGB (H, S, L, &wp_r, &wp_g, &wp_b);
 
-    /* A fekete és fehér pont célpontjának kiszámítása. */
-    /* Ez mutatja meg, hogy a fekete és fehér pont átlag RGB-jét */
-    /* hova kell húzni úgy, hogy az RGB kockában a két csúcsot */
-    /* összekötő 'szürke' egyenessel párhuzamosan tolva a távolsága */
-    /* a 'szürke' egyenestől és a színiránya megmaradjon, */
-    /* de a lehető legsötétebb- vagy legvilágosabb legyen */
+    /* Calculation of the target points for the black and white points. */
+    /* This shows where to move the average RGB of the black and white points */
+    /* so that it is parallel to the 'gray' line connecting the two vertices in the RGB cube, */
+    /* maintaining the distance from the 'gray' line and the direction of the color, */
+    /* but as dark or as bright as possible */
     /* */
-    /* Másképpen fogalmazva eltoljuk a szürke egyenes mentén addig, */
-    /* amíg az RGB kocka falába nem ütközünk (mindkét iránynál) */
+    /* In other words, we shift along the gray line until we hit the wall of the RGB cube (in both directions) */
     /* */
-    /* Ez  annyiban változtatás az előzőkhöz képest, hogy a fekete pontot */
-    /* most már nem a tökéletes feketébe húzzuk, hanem az annak megfelelő */
-    /* olyan legsötétebb pontba, ahol a maximum a színtelítettség */
-    /* és aminek színe megegyezik a fekete pontéval, */
-    /* ezzel a rossz színegyensúlyt és nem megfelelő kontrasztot küszöbölöm ki. */
+    /* This is a change from the previous methods in that the black point is */
+    /* now not just pulled to perfect black, but to the corresponding */
+    /* darkest point where the color saturation is maximal */
+    /* and whose color matches that of the black point, */
+    /* thereby eliminating poor color balance and inappropriate contrast. */
 
     temp3 = bp_r;
     if (temp3 > bp_g) { temp3 = bp_g; }
@@ -932,56 +920,54 @@ void AARGB_MAIN(
 
 
 /* ----------------- */
-/* ---- RGB TÉR ---- */
+/* ---- RGB SPACE ---- */
 /* ----------------- */
-/* A teljes RGB teret egy szabályos 3D-s kocka foglalja magába, */
-/* amelynek 1-1 éle jelenti a R, a G és a B tengelyt */
-/* és egyik csúcsában található a tökéletes fehér szín, */
-/* a másik (ezzel szemköti) csúcsában pedig a tökéletes fekete */
-/* és ezt a két csúcsot összekötő egyenes tartalmazza a */
-/* feketétől fehérig terjedő teljes szürke skálát. */
-/* A színeltolás mértéke pedig nem más, mint az adott szín */
-/* távolsága merőleges írányban szürke skála egyenesétől */
-/* (amit egy 0 és 1 közötti érték jellemezhet, ahol a 0 */
-/* azt jelenti, hogy a szín szürke, vagyis az egyenesen található) */
+/* The entire RGB space is encompassed by a regular 3D cube, */
+/* where each edge represents the R, G, and B axes */
+/* and in one corner lies the perfect white color, */
+/* while the opposite corner holds the perfect black */
+/* and the line connecting these two vertices contains the */
+/* complete gray scale from black to white. */
+/* The measure of color shift is nothing but the distance of the given color */
+/* perpendicular from the gray scale line */
+/* (which can be characterized by a value between 0 and 1, where 0 */
+/* means the color is gray, i.e., it is located on the line) */
 /* */
 /* ------------------------- */
-/* ---- RGB SZÍN IRÁNYA ---- */
+/* ---- DIRECTION OF RGB COLORS ---- */
 /* ------------------------- */
-/* A fekete és fehér pont átlag eltolási RGB értékét összehasonlítom, */
-/* hogy megállapítsam, vajon megegyező irányban vannak-e eltolva, */
-/* mivel ha nem jó a kép színegyensúlya, akkor feltételezem, hogy */
-/* a kép összes színe a színegyensúly felborulását okozó tényező miatt */
-/* megegyező irányban tolódik el. Ha nem megegyező irányba mutat */
-/* az eltolásuk értéke, akkor feltételezem, hogy ez nem azért van, */
-/* mert a színegyensúly felborult. Ekkor a kontraszt műveletnél nem */
-/* alkalmazok színegyensúly kiegyenlítést (vagyis a kép színeinek */
-/* a tökéletes fehér és tökéletes fekete irányába való RGB korrekcióját). */
+/* I compare the average RGB shift values of the black and white points, */
+/* to determine if they are shifted in the same direction, */
+/* because if the color balance of the picture is off, I assume that */
+/* all colors of the picture are shifted in the same direction due to the factor */
+/* causing the imbalance. If their shifts do not point in the same direction, */
+/* I assume that it is not due to a disturbed color balance. In this case, during the contrast operation, I do not */
+/* apply color balance compensation (i.e., correction of the picture's colors */
+/* towards the direction of perfect white and perfect black). */
 /* */
-/* Egy adott szín irányán az RGB kockában található pontjából kiinduló */
-/* merőleges szakasz körülforgási szögét értem a szürke egyenesre nézve. */
-/* Ennek értéke -180 és 180 fok közé kell hogy essen. */
-/* Így a fekete és fehér pont átlag RGB színeinek iránya megad két szöget. */
-/* Ennek különbsége adja meg, hogy milyen mértékkel kell színegyensúly */
-/* kompenzációt végezni. Minél jobban egyírányba mutatnak, annál erősebb */
-/* színkompenzáció szükséges. */
+/* The direction of a given color in the RGB cube refers to the angle of rotation */
+/* of the perpendicular segment starting from its point in the cube towards the gray line. */
+/* This value should fall between -180 and 180 degrees. */
+/* Thus, the direction of the average RGB colors of the black and white points gives two angles. */
+/* The difference between them indicates the extent to which color balance */
+/* compensation needs to be performed. The more they point in the same direction, the stronger */
+/* the color compensation needs to be. */
 
 
 
 /* ------------------------------------------------------------------------------------ */
 /* Get RGB color directions of the White and Black points and change average RGB colors */
 /* ------------------------------------------------------------------------------------ */
-/* Megállapítjuk a fekete és fehér pont átlag RGB értékeinek irányát */
-/* Ez két szöget ad vissza, és ennek a különbségét vizsgáljuk, */
-/* minél kevésbé eltérő, az átlag RGB értékeket annál jobban lecseréljük */
-/* a tökéletes fekete és fehér értékre, így a kontraszt állításnál */
-/* jobban keletkezik színegyensúly korrekció */
+/* We determine the direction of the average RGB values of the black and white points */
+/* This returns two angles, and we examine their difference, */
+/* the less different they are, the more we replace the average RGB values */
+/* with the perfect black and white values, thus more color balance correction occurs during contrast adjustment */
 /* */
-/* Mivel az irányuk egy 360˚-os szöget zár be, és az eltérő színek 60˚-onként vannak, */
-/* ezért a 60˚-nál nagyobb eltérést teljesen különbözőnek vesszük. */
-/* Vagyis a 60˚-nál kisebb eltérésnél toljuk csak el arányosan a fekete és */
-/* fehér pont célpontját a tökéletes fekete és a tökéletes fehér írányába */
-/* (vagyis egyező irány esetén teljes színkorrekció lép fel) */
+/* Since their directions encompass a 360° angle, and different colors are at every 60°, */
+/* therefore, we consider a deviation greater than 60° as completely different. */
+/* Meaning, only at a deviation less than 60° do we proportionally shift the target points of the black and */
+/* white points towards the direction of perfect black and perfect white */
+/* (i.e., in case of matching directions, full color correction occurs) */
 
     RGB_TO_HSL (bp_r_end, bp_g_end, bp_b_end, &H, &S, &L);
     temp1 = H;
@@ -994,21 +980,21 @@ void AARGB_MAIN(
     /* if angle of direction is larger than 180 degree, then take the smaller section of the circle,
        it means it'll always be less or equal than 180 deg */
     if (temp2 > 0.5) { temp2 = 1 - temp2; }
-    /* if the angle is greater then 60 degree, that means the colors are totally different,
-       so i check the amount of difference on this 1/6 intervall only from 0 to 60 degrees. */
+    /* if the angle is greater than 60 degrees, that means the colors are totally different,
+       so I check the amount of difference only on this 1/6 interval from 0 to 60 degrees. */
     temp2 = temp2 * 6;
     if (temp2 > 1){ temp2 = 1; }
 
-    /* raise the value (0..1) of angle difference to 3th power to make color balance a bit more aggressive */
+    /* raise the value (0..1) of angle difference to 3rd power to make color balance a bit more aggressive */
     temp2 = temp2 * temp2 * temp2;
 
-    /* Ezzel megvan az iránykülönbség értéke egy [0..1] intervallumon, */
-    /* ahol a 0 a teljes egyezést mutatja */
-    /* most az egész 'kör' hatod részét vizsgálom csak és */
-    /* abból alakítok ki egy értéket a [0..1] intervallumon, */
-    /* hogy majd ezzel szorozni tudjam a fekete pont fényerejét, */
-    /* vagyis ha egyeznek az írányok, akkor tökéletes feketébe megy el */
-    /* ugyanez a fehér pont esetében */
+    /* With this, we have the value of the direction difference in a [0..1] interval, */
+    /* where 0 shows complete agreement */
+    /* now I only examine a sixth of the 'circle' and */
+    /* create a value from it in the [0..1] interval, */
+    /* so that I can use it to multiply the brightness of the black point, */
+    /* meaning if the directions match, it goes to perfect black */
+    /* and the same applies to the white point */
     if (temp2 < 1) {
         RGB_TO_HSL (bp_r_end, bp_g_end, bp_b_end, &H, &S, &L);
         L = L * temp2;
@@ -1025,15 +1011,14 @@ void AARGB_MAIN(
 /* ------------------------------------------------------------------------------ */
 /* Convert original Histogram using White and Black point values */
 /* ------------------------------------------------------------------------------ */
-/* Eredeti hisztogramból a fekete és fehér pont alapján megváltoztatott */
-/* hisztogram létrehozása */
+/* Creating a modified histogram from the original histogram based on */
+/* the black and white point values */
 
-/* Nem az egész kép újraanalizálása, hanem csak az eredeti hisztogramé, */
-/* mert így csak 256 értéket kell feldolgozni a kép összes pontjai számának */
-/* helyett. Ez a hisztogram az automatikus kontraszt állítás utáni állapotát */
-/* mutatja a képnek */
+/* Not re-analyzing the entire image, but just the original histogram, */
+/* because this way only 256 values need to be processed instead of the total number of points in the image. */
+/* This histogram represents the state of the image after automatic contrast adjustment */
 
-/* Ez a hisztogram lesz felhasználva a gamma súlypont megállapításához */
+/* This histogram will be used to determine the center of gravity for the gamma correction */
 
     #ifdef __OPENMP__
     #pragma omp parallel for private(temp2, temp3, cc, N) num_threads(max_threads2)
@@ -1042,28 +1027,28 @@ void AARGB_MAIN(
 
 	temp2 = (double)(i1) / 255;
 
-        /* bp-től és wp-től viszonyított nullára húzással a kontraszt számolás az alábbi */
+        /* Calculation of contrast by pulling towards zero relative to bp and wp is as follows */
         /*temp2 = bp + ((temp2 - bp) * (1 - bp) / (wp - bp)); */
         /*temp2 = 1 - (1 - temp2) * 1 / (1 - bp); */
 
-        /* teljes intervallumon számolt húzással a kontraszt számolás az alábbi */
+        /* Calculation of contrast with full range pull is as follows */
         /*temp2 = temp2 * wp_end / wp; */
         /* ---> bp = bp * wp_end / wp; */
         /* ---> bp_end = bp_end * wp_end / wp; */
         /*temp2 = 1 - (1 - temp2) * (1 - bp_end * wp_end / wp) / (1 - bp * wp_end / wp); */
 
-        /* bp_end-től és wp_end-től viszonyított bp-ből és wp-ből húzással a kontraszt számolás az alábbi */
+        /* Calculation of contrast by pulling from bp and wp towards bp_end and wp_end is as follows */
         if ((temp2 > bp_end) && (wp > bp_end)) {
 		temp2 = bp_end + (temp2 - bp_end) * (wp_end - bp_end) / (wp - bp_end); }
-        /* itt a bp fekete pontot is fel kell szorozni a következő számításhoz, */
-        /* mert a bp_end -től viszonyítva nyújtjuk a skálát jobbra a fehér irányába */
-        /* és ezért elmászik a bp */
+        /* here bp black point also needs to be multiplied for the following calculation, */
+        /* because we are stretching the scale to the right towards white relative to bp_end */
+        /* and therefore bp shifts */
 	temp3 = 0;
         if (wp > bp_end) {
 		temp3 = bp_end + (bp - bp_end) * (wp_end - bp_end) / (wp - bp_end); }
         if ((temp2 < wp_end) && (wp_end != temp3)) {
 		temp2 = wp_end - (wp_end - temp2) * (wp_end - bp_end) / (wp_end - temp3); }
-        /*az 'if' utasításoknál mindenhol vizsgálom hogy ne lehessen nullával való osztás */
+        /* in 'if' statements everywhere I check to prevent division by zero */
 
         if (temp2 > 1){ temp2 = 1; }
         if (temp2 < 0){ temp2 = 0; }
@@ -1088,20 +1073,20 @@ void AARGB_MAIN(
 /* ------------------------------------------------------------------------------ */
 /* Gamma value calculating */
 /* ------------------------------------------------------------------------------ */
-/* Gamma súlypont megállapítása a második hisztogram alapján, ami már az */
-/* állított kontraszt utáni helyzetet mutatja */
-/* A végeredmény azt adja meg, hogy mennyire kell világosítani, vagy éppen */
-/* sötétíteni a képet, hogy az össz fényereje a képnek egyensúlyban legyen */
+/* Determining the gamma center of gravity based on the second histogram, which shows */
+/* the situation after contrast adjustment */
+/* The final result indicates how much the image needs to be lightened or darkened */
+/* to balance the overall brightness of the image */
 
-/* A gamma súlypont az az érték, amely a hisztogramban azt mutatja, */
-/* hogy tõle balra és jobbra egyaránt egyforma számú képpont található */
-/* (vagyis fele a kép összes pontjainak) */
+/* The gamma center of gravity is the value in the histogram that indicates */
+/* an equal number of image points on both its left and right sides */
+/* (i.e., half of all the points in the image) */
 
-/* Ezt úgy kapjuk meg, hogy elkezdjük olvasni a hisztogram értékeit az */
-/* egyik oldalról befelé, és közben össze adjuk a kapott értékeket */
-/* Ha ez az érték elérte vagy túllépte a kép összes pontjainak a számának */
-/* felét, akkor megállunk és a tömb aktuális indexe adja meg */
-/* a gamma súlypont megfelelõ értékét */
+/* This is obtained by starting to read the histogram values from one side inward */
+/* and summing up the values we get */
+/* If this sum reaches or exceeds half of the total number of points in the image */
+/* we stop and the current index of the array gives us the appropriate value */
+/* for the gamma center of gravity */
 
 /*
     gamma_weight_mid_all = 0;
@@ -1135,7 +1120,7 @@ void AARGB_MAIN(
     }
 */
 
-    /* Hisztogramm súlyának megállapítása */
+    /* Determining the histogram weight */
     gamma_weight_low_all = 0;
     gamma_weight_high_all = 0;
 
@@ -1148,7 +1133,7 @@ void AARGB_MAIN(
     #endif
     for (i1=128; i1<256; i1++){ gamma_weight_high_all += hist2[i1]; }
 
-    /* Hisztogramm súlypont megállapítása */
+    /* Determining the histogram center of gravity */
     i3 = 0;
     flag1 = 0;
     gamma_weight_low = 0;
@@ -1176,12 +1161,12 @@ void AARGB_MAIN(
     gamma_weight_low = gamma_weight_low / 255;
     gamma_weight_high = gamma_weight_high / 255;
 
-    /* Súlypont eltolás szükségességének megállapítása */
+    /* Determining the necessity of shifting the center of gravity */
     gamma_low = 1;
     gamma_high = 1;
 
-    /* gammát csak egyírányban toljuk el, */
-    /* vagyis csak világosítunk ha szükséges, de soha sem sötétítünk */
+    /* we only shift gamma in one direction, */
+    /* meaning we only lighten if necessary, but never darken */
     if (gamma_weight_low < gamma_interval_low){
         gamma_low = log(gamma_interval_low) / log(gamma_weight_low);
     }
@@ -1199,16 +1184,14 @@ void AARGB_MAIN(
 /* ------------------------------------------------------------------------------ */
 /* Recalculate the RGB values by setting the CONTRAST, COLOR BALANCE and GAMMA */
 /* ------------------------------------------------------------------------------ */
-/* Kép színeinek újrakalkulálása (kontraszt, színegyensúly és gamma korrekció) */
-/* A kép összes pontja újrakalkulálódik és visszaíródik a pufferba */
+/* Recalculating the colors of the image (contrast, color balance, and gamma correction) */
+/* All points of the image are recalculated and rewritten into the buffer */
 
-/* A gamma állításnál a kép színének RGB-jét a gammához mérten nem külön */
-/* színcsatornánként, hanem a fényerejükhöz mérten egyben vannnak állítva */
-/* A gamma úgy állítódik, hogy a súlypont el van tolva 128-ba */
-/* (tehát ha kisebb az értéke akkor növekszik, ha nagyobb, akkor meg csökken) */
-/* és ez magával húzza nyújtásos módon arányosan a közép színeket */
-/* a 128 irányába */
-
+/* In gamma adjustment, the RGB color of the image is adjusted not separately for each color channel, */
+/* but together according to their brightness */
+/* The gamma is adjusted such that the center is shifted to 128 */
+/* (so if the value is less, it increases, and if more, it decreases) */
+/* and this proportionally stretches the mid-colors towards 128 */
 
     #ifdef __OPENMP__
     #pragma omp parallel for private(x, y, addr, addr2, col_r, col_g, col_b, col_r2, col_g2, col_b2, temp2, temp3, cc, H, S, L, N) num_threads(max_threads2)
@@ -1235,7 +1218,7 @@ void AARGB_MAIN(
 
 
             /* CONTRAST SHIFT AND COLOR BALANCE */
-            /* bp_end-től és wp_end-től viszonyított bp-ből és wp-ből húzással a kontraszt számolás az alábbi */
+            /* Calculation of contrast by pulling from bp_end and wp_end towards bp and wp as follows */
             if ((col_r2 > bp_r_end) && (wp_r > bp_r_end)) {
                 col_r2 = bp_r_end + (col_r2 - bp_r_end) * (wp_r_end - bp_r_end) / (wp_r - bp_r_end); }
             if ((col_g2 > bp_g_end) && (wp_g > bp_g_end)) {
@@ -1243,9 +1226,9 @@ void AARGB_MAIN(
             if ((col_b2 > bp_b_end) && (wp_b > bp_b_end)) {
                 col_b2 = bp_b_end + (col_b2 - bp_b_end) * (wp_b_end - bp_b_end) / (wp_b - bp_b_end); }
 
-            /* itt a bp fekete pontot is fel kell szorozni a következő számításhoz, */
-            /* mert a bp_end -től viszonyítva nyújtjuk a skálát jobbra a fehér irányába */
-            /* és ezért elmászik a bp */
+            /* here the bp black point also needs to be multiplied for the next calculation, */
+            /* because we are stretching the scale to the right towards white relative to bp_end */
+            /* and therefore bp shifts */
 	    temp3 = 0;
             if (wp_r > bp_r_end) {
                 temp3 = bp_r_end + (bp_r - bp_r_end) * (wp_r_end - bp_r_end) / (wp_r - bp_r_end); }
@@ -1264,7 +1247,7 @@ void AARGB_MAIN(
             if ((col_b2 < wp_b_end) && (wp_b_end != temp3)) {
                 col_b2 = wp_b_end - (wp_b_end - col_b2) * (wp_b_end - bp_b_end) / (wp_b_end - temp3); }
 
-            /* határérték ellenőrzés és visszaírás */
+            /* boundary check and rewrite */
             if (col_r2 > 1){ col_r2 = 1; }
             if (col_g2 > 1){ col_g2 = 1; }
             if (col_b2 > 1){ col_b2 = 1; }
@@ -1274,8 +1257,8 @@ void AARGB_MAIN(
 
 
             /* GAMMA CORRECTION */
-            /* megjegyzés: ez a gamma felhúzásos módszer színesebb végeredményt ad */
-            /* mint amelyiknél külön - külön toljuk a színeket, nem arányosan */
+            /* note: this method of gamma lifting gives a more colorful result */
+            /* than the one where colors are shifted individually, not proportionally */
             temp2 = (col_r2 + col_g2 + col_b2) / 3;
             cc = (long)(temp2 * 255);
 
@@ -1304,7 +1287,7 @@ void AARGB_MAIN(
                 }
             }
 
-            /* határérték ellenőrzés és visszaírás */
+            /* boundary check and rewrite */
             if (col_r2 > 1){ col_r2 = 1; }
             if (col_g2 > 1){ col_g2 = 1; }
             if (col_b2 > 1){ col_b2 = 1; }
@@ -1327,13 +1310,13 @@ void AARGB_MAIN(
                 y <= y2) {
                     double H, S, L;
                     RGB_TO_HSL (col_r2, col_g2, col_b2, &H, &S, &L);
-                    /* Az 'S' értékét a szürke egyenes közepétől távolodva kisebbnek veszem itt, */
-                    /* mert az optikailag egyre kevésbé tűnik színesnek, */
-                    /* és ennél a résznél optikailag vizsgálok */
+                    /* Here, I consider the 'S' value smaller as we move away from the center of the gray line, */
+                    /* because optically it appears less colorful, */
+                    /* and here I am examining optically */
                     if (L > 0.5) { L = 1 - L; }
                     S = S * L * 2;
-                    /* Ha S = 0, vagyis szürke a szín, akkor nem adom hozzá */
-                    /* a színtelítettség hisztogramjához értelemszerűen */
+                    /* If S = 0, meaning the color is gray, then I don't add it */
+                    /* to the saturation histogram for obvious reasons */
                     if (S > 0) {
 
                         cc = (long)(S * 255);
@@ -1359,10 +1342,10 @@ void AARGB_MAIN(
 
 
 /* ------------------------------------------------------------------------------ */
-/* Recalculate the RGB values by setting the SATURAION */
+/* Recalculate the RGB values by setting the SATURATION */
 /* ------------------------------------------------------------------------------ */
 
-    /* Hisztogram átlag értékének megállapítása */
+    /* Determining the average value of the histogram */
     hist_satur_avg = 0;
 
     #ifdef __OPENMP__
@@ -1372,12 +1355,12 @@ void AARGB_MAIN(
         hist_satur_avg += hist_satur[i1];
     }
     hist_satur_avg = hist_satur_avg / 255;
-    /* levágási limit megállapítása, ez az átlag 10%-a bevált a kontrasztnál is,
-    ezzel az értékkel megfelelően állítja be önmagát a hisztogram,
-    és a megfelelő nagyságú szélek esnek le */
+    /* Establishing a cut-off limit, which is 10% of the average, has proven effective in contrast adjustment,
+    with this value the histogram self-adjusts properly,
+    and the edges are cut off at the appropriate size */
     temp1 = hist_satur_avg * 0.1;
 
-    /* Hisztogram szélének keresése a színek felhúzásához */
+    /* Searching the edge of the histogram to lift the colors */
     i3 = 0;
     flag1 = 0;
     for (i1=255; i1>=0; i1--){
@@ -1390,12 +1373,12 @@ void AARGB_MAIN(
     }
     hist_satur_low = (double)(i3) / 255;
 
-    /* Határérték ellenőrzés */
+    /* Boundary check */
     hist_satur_ok = 1;
     if (hist_satur_low > satur_max){ hist_satur_low = satur_max; }
     if (hist_satur_low > 0){ hist_satur_ok = log(satur_max) / log(hist_satur_low); }
 
-  /* run saturation recalculation only if necessary */
+  /* Run saturation recalculation only if necessary */
   if (hist_satur_ok != 1){
 
     #ifdef __OPENMP__
@@ -1409,7 +1392,7 @@ void AARGB_MAIN(
 
             addr = addr2 + x * 3;
 
-            /* apply changes ONLY on selected area of the image */
+            /* Apply changes ONLY on selected area of the image */
             if ((apply_on_selection == 0) || ((apply_on_selection) &&
                 (x >= x1 &&
                 x <= x2 &&
@@ -1426,17 +1409,17 @@ void AARGB_MAIN(
 
             RGB_TO_HSL (col_r2, col_g2, col_b2, &H, &S, &L);
 
-            /* szín telítettségének hatványos emelése a gammához hasonlóan,
-               vagyis hatványra emelem az eredeti színtelítettség értékét,
-               és beszorzom a 0.5-től való távolságának kétszeresével,
-               hogy a 0.5 pontban lévők maximálisan nővekedjenek, míg az ettől
-               távolabbra lévők egyre kevesebb mértékben, a 0 és 1 helyen lévők pedig semennyire,
+            /* Power raising of color saturation similar to gamma,
+               meaning I raise the original saturation value to a power,
+               and multiply it with twice the distance from 0.5,
+               so that those at the 0.5 point increase maximally, while those farther away
+               increasingly less, and those at 0 and 1 not at all,
                
-               másképpen fogalmazva, exponenciálisan állítom, de úgy, hogy a közepéhez
-               közelebb lévők jobban állítódjanak, míg az ettől egyre távolabb esők kevésbé -
-               erre azért van így szükség, mert a sima hatványra emelésnél túl drasztikus
-               a görbe és az alsóbb részei a hisztogramnak is túl nagyot ugranak,
-               így viszont megfelelő lesz a változás, mindegy mekkora az.
+               in other words, I adjust it exponentially, but such that those closer to the center
+               adjust more, while those farther away less -
+               this is necessary because with simple power raising the curve is too drastic
+               and the lower parts of the histogram jump too much,
+               this way, however, the change will be appropriate, no matter how big it is.
             */
 
             if (hist_satur_ok != 1){
@@ -1454,11 +1437,11 @@ void AARGB_MAIN(
             image_buffer[addr + 1] = col_g & 0xff;
             image_buffer[addr + 2] = col_b & 0xff;
 
-            /*Mellékesen a legvégső Hisztogram létrehozása is */
+            /* Additionally, creating the final Histogram */
             cc = (long)((double)(col_r + col_g + col_b) / 3);
 
             /*hist3[cc]++; */
-	    /* this is a replacement code for arrays for multi processing */
+        /* this is a replacement code for arrays for multi processing */
 #ifdef __OPENMP__
 	    N = omp_get_thread_num();
 #else
@@ -1484,23 +1467,23 @@ void AARGB_MAIN(
   }
 
 
-/* a test rész csak akkor működik, ha van math library, mert itt használok szögfüggvényeket */
+/* The test part only works if there is a math library, because here I use trigonometric functions */
 
 /* ------------------------------------------------------------------------------ */
 /* TEST: Show Histograms by Drawing them on Image */
 /* ------------------------------------------------------------------------------ */
 /* */
-    /* csak normál RGB tömbnél élhet a tesztelés */
+    /* Testing is only possible with a normal RGB array */
     if ((format_flag == 0) && (test_flag == 1)) {
-        /* a max érték kezdõértéke 1, hogy 0-val való osztás ne fordulhasson elõ */
+        /* The starting value of the max is 1, to avoid division by zero */
         long hist1_max = 1;
         long hist2_max = 1;
         long hist3_max = 1;
         long histS_max = 1;
 
-        /* Figyelem! Többszöri lefuttatása a rutinnak ugyanazon a képen */
-        /* nem várt eredményt produkál ha a hisztogrammok is ki vannak rajzolva, */
-        /* mert akkor már a teszt képet is beleveszi a számításba */
+        /* Be aware! Running the routine multiple times on the same image */
+        /* produces unexpected results if the histograms are also drawn, */
+        /* because then the test image is also included in the calculation */
         for (i1=0; i1<256; i1++){ if (hist1_max < hist1[i1]) { hist1_max = hist1[i1]; } }
         for (i1=0; i1<256; i1++){ if (hist2_max < hist2[i1]) { hist2_max = hist2[i1]; } }
         for (i1=0; i1<256; i1++){ if (hist3_max < hist3[i1]) { hist3_max = hist3[i1]; } }
@@ -1515,7 +1498,7 @@ void AARGB_MAIN(
                 if (format_flag == 1) { ym = bh - 1 - ym; }
                 if (format_flag == 2) { ym = bh - 1 - ym; }
 
-                /* Keret rajzolása a hisztogrammok köré 1 pixel szélességben */
+                /* Drawing a frame around the histograms with 1-pixel width */
                 if (((xm == 256) && (ym <= 601)) || ((ym == 601) && (xm <= 256))) {
                         col = color_black;
                         image_buffer[addr + 2] = (col >> 0)  & 0xff;
@@ -1523,11 +1506,11 @@ void AARGB_MAIN(
                         image_buffer[addr + 0] = (col >> 16) & 0xff;
                 }
 
-                /* Hisztogrammok kirajzolása */
+                /* Drawing the Histograms */
                 if ((xm >= 0) && (xm <= 255)) {
-			double rad, outline, pi;
+                    double rad, outline, pi;
 
-                    /* 1. hisztogramm: EREDETI KÉP ÁLLAPOTA KONTRASZT ÁLLÍTÁSSAL*/
+                    /* 1. histogram: ORIGINAL IMAGE STATE WITH CONTRAST ADJUSTMENT */
                     if (ym <= 99) {
                         i2 = hist1[xm] * 99 / hist1_max;
                         xma1 = (long)(bp * 255);
@@ -1558,7 +1541,7 @@ void AARGB_MAIN(
                         image_buffer[addr + 0] = (col >> 16) & 0xff;
                     }
 
-                    /* 2. hisztogramm: KONTRASZT UTÁN GAMMA ÁLLÍTÁSSAL */
+                    /* 2. histogram: AFTER CONTRAST WITH GAMMA ADJUSTMENT */
                     if ((ym >= 100) && (ym <= 199)) {
                         i2 = hist2[xm] * 99 / hist2_max;
                         xma1 = (long)(gamma_weight_low * 255);
@@ -1571,8 +1554,8 @@ void AARGB_MAIN(
                                 col = color_brown;
                             }
                             else{
-			        /* vörössel jelölöm barna helyett, hogy ez vissza irányú gamma állítás lenne,
-			        ez viszont nem kerül számításra */
+                                /* I mark it with red instead of brown, indicating that this would be a backward gamma adjustment,
+                                but this is not calculated */
                                 if ((xm > xma2) && (xm < xma1))
                                 {
                                     col = color_red;
@@ -1585,11 +1568,11 @@ void AARGB_MAIN(
                         else {
                             col = color_green;
                         }
-                        /* Gamma alsó súlypont */
+                        /* Lower gamma center of gravity */
                         if (xm == xma1) {
                             col = color_white;
                         }
-                        /* Gamma felső súlypont */
+                        /* Upper gamma center of gravity */
 /*                        if (xm == (long)(gamma_weight_high * 255)) {
                             col = color_white;
                         }*/
@@ -1598,7 +1581,7 @@ void AARGB_MAIN(
                         image_buffer[addr + 0] = (col >> 16) & 0xff;
                     }
 
-                    /* 3. hisztogramm SZÍNTELÍTETTSÉG ÁLLÍTÁSSAL */
+                    /* 3. histogram: WITH SATURATION ADJUSTMENT */
                     if ((ym >= 200) && (ym <= 299)) {
                         i2 = hist_satur[xm] * 99 / histS_max;
                         xma1 = (long)((hist_satur_low)* 255);
@@ -1621,7 +1604,7 @@ void AARGB_MAIN(
                         image_buffer[addr + 0] = (col >> 16) & 0xff;
                     }
 
-                    /* 4. hisztogramm: KONTRASZT, GAMMA és SZÍNTELÍTETTSÉG UTÁN (VÉGSŐ) */
+                    /* 4. histogram: AFTER CONTRAST, GAMMA, AND SATURATION ADJUSTMENT (FINAL) */
                     if ((ym >= 300) && (ym <= 399)) {
                         i2 = hist3[xm] * 99 / hist3_max;
                         if (399 - ym >= i2) {
@@ -1635,12 +1618,12 @@ void AARGB_MAIN(
                         image_buffer[addr + 0] = (col >> 16) & 0xff;
                     }
 
-                    /* 5. Fekete és fehér pont színirányának kirajzolása egy körbe */
-                    /* konstans a kör sugarához */
+                    /* 5.: Drawing the color direction of black and white points in a circle */
+                    /* Constant for the radius of the circle */
                     rad = 100;
-                    /* konstans a körvonal vastagságához */
+                    /* Constant for the thickness of the circle line */
                     outline = 10;
-                    /* pi értéke */
+                    /* Value of pi */
                     pi = 3.1415926535897932;
                     if ((ym >= 400) && (ym <= 400+rad*2)) {
                         double rr, rx, ry;
@@ -1649,11 +1632,11 @@ void AARGB_MAIN(
                         ry = ym - 400 - rad;
                         rr = sqrt(rx*rx + ry*ry);
 
-                        /* KÖRÍV MEGRAJZOLÁSA */
-                        if ((rr <= rad) && (rr >= rad-outline)) {
+                        /* DRAWING THE CIRCLE ARC */
+                        if ((rr <= rad) && (rr >= rad - outline)) {
                                 H = 0;
-                                if ((rx >= 0) && (ry <  0)) { H = asin( rx / rr) / pi / 2 + 0.00; }
-                                if ((rx >= 0) && (ry >= 0)) { H = asin( ry / rr) / pi / 2 + 0.25; }
+                                if ((rx >= 0) && (ry <  0)) { H = asin(rx / rr) / pi / 2 + 0.00; }
+                                if ((rx >= 0) && (ry >= 0)) { H = asin(ry / rr) / pi / 2 + 0.25; }
                                 if ((rx <  0) && (ry >= 0)) { H = asin(-rx / rr) / pi / 2 + 0.50; }
                                 if ((rx <  0) && (ry <  0)) { H = asin(-ry / rr) / pi / 2 + 0.75; }
                                 S = 1;
@@ -1661,7 +1644,7 @@ void AARGB_MAIN(
                                 L = rad - rr;
                                 if (L > outline / 2) { L = outline - L; }
                                 L = L / outline;
-                                HSL_TO_RGB (H, S, L, &col_r2, &col_g2, &col_b2);
+                                HSL_TO_RGB(H, S, L, &col_r2, &col_g2, &col_b2);
                                 col_r = (long)(col_r2 * 255);
                                 col_g = (long)(col_g2 * 255);
                                 col_b = (long)(col_b2 * 255);
@@ -1676,9 +1659,9 @@ void AARGB_MAIN(
                             px = 0; py = 0;
                             lx = 0; ly = 0;
 
-                            /* FEKETE PONT SZÍNIRÁNYA EGYENESÉNEK MEGHÚZÁSA */
-                            /* Szürke pontnál nem jelenik meg egyenes a körben */
-                            RGB_TO_HSL (bp_r, bp_g, bp_b, &H, &S, &L);
+                            /* DRAWING THE COLOR DIRECTION LINE OF THE BLACK POINT */
+                            /* The line does not appear in the circle for a gray point */
+                            RGB_TO_HSL(bp_r, bp_g, bp_b, &H, &S, &L);
 
                             if ((H >= 0.00) && (H < 0.25)) { lx =  sin((H - 0.00) * 2 * pi) * rr; ly =  cos((H - 0.00) * 2 * pi) * rr; }
                             if ((H >= 0.25) && (H < 0.50)) { lx =  cos((H - 0.25) * 2 * pi) * rr; ly = -sin((H - 0.25) * 2 * pi) * rr; }
@@ -1696,8 +1679,8 @@ void AARGB_MAIN(
                                 else { col = color_gray; }
                             }
 
-                            /* FEHÉR PONT SZÍNIRÁNYA EGYENESÉNEK MEGHÚZÁSA */
-                            RGB_TO_HSL (wp_r, wp_g, wp_b, &H, &S, &L);
+                            /* DRAWING THE COLOR DIRECTION LINE OF THE WHITE POINT */
+                            RGB_TO_HSL(wp_r, wp_g, wp_b, &H, &S, &L);
 
                             if ((H >= 0.00) && (H < 0.25)) { lx =  sin((H - 0.00) * 2 * pi) * rr; ly =  cos((H - 0.00) * 2 * pi) * rr; }
                             if ((H >= 0.25) && (H < 0.50)) { lx =  cos((H - 0.25) * 2 * pi) * rr; ly = -sin((H - 0.25) * 2 * pi) * rr; }
@@ -1729,13 +1712,13 @@ void AARGB_MAIN(
 
 exit:
 
-    if (hist_saturn){ free (hist_saturn); }
-    if (hist1n)     { free (hist1n);      }
-    if (hist2n)     { free (hist2n);      }
-    if (hist3n)     { free (hist3n);      }
-    if (col_r3n)    { free (col_r3n);     }
-    if (col_g3n)    { free (col_g3n);     }
-    if (col_b3n)    { free (col_b3n);     }
+    if (hist_saturn){ free(hist_saturn); }
+    if (hist1n)     { free(hist1n);      }
+    if (hist2n)     { free(hist2n);      }
+    if (hist3n)     { free(hist3n);      }
+    if (col_r3n)    { free(col_r3n);     }
+    if (col_g3n)    { free(col_g3n);     }
+    if (col_b3n)    { free(col_b3n);     }
 
 }
 
